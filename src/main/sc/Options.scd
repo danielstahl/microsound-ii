@@ -8,3 +8,16 @@ Server.internal.options.sampleRate = 96000;
 Server.local.options.numBuffers = 2056;
 Server.internal.options.numBuffers = 2056;
 )
+
+
+s.boot;
+s.shutdown;
+
+//Turn on dumpOSC
+s.dumpOSC(1);
+
+//Turn of dumpOSC
+s.dumpOSC(0);
+
+// Find the first private bus
+s.options.firstPrivateBus;

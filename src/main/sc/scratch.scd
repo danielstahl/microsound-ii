@@ -17,12 +17,26 @@ Synth("noiseInstrument", [startFiltFreq: 200, endFiltFreq: 1000, startFiltBw: 0.
 
 
 /*
-Impulse
-{ Impulse.ar(13, 0.0, 0.5, 0) }.play
-Pulse
-{ Pulse.ar(13, 0.5, 0.2) }.play;
-Try to combine with bandpass filter
+http://community.dur.ac.uk/nick.collins/teaching/supercollider/sctutorial/6.4 Effects 1.html
+http://ecmc.rochester.edu/ecmc/docs/supercollider/scbook/Ch21_Interface_Investigations/ixi SC tutorial/ixi_SC_tutorial_12.html
 
-See page 72
-Pulse train followed by narrow bandpass
+http://doc.sccode.org/Tutorials/Mark_Polishook_tutorial/17_Delays_reverbs.html
+http://doc.sccode.org/Classes/NestedAllpassC.html
+
+(
+{
+var s, z, y;
+    // 10 voices of a random sine percussion sound :
+s = Mix.ar(Array.fill(10, { Resonz.ar(Dust.ar(0.2, 50), 200 + 3000.0.rand, 0.003)}) );
+    // reverb predelay time :
+z = DelayN.ar(s, 0.048);
+    // 7 length modulated comb delays in parallel :
+y = Mix.ar(Array.fill(7,{ CombL.ar(z, 0.1, LFNoise1.kr(0.1.rand, 0.04, 0.05), 15) }));
+    // two parallel chains of 4 allpass delays (8 total) :
+4.do({ y = AllpassN.ar(y, 0.050, [0.050.rand, 0.050.rand], 1) });
+    // add original sound to reverb and play it :
+s+(0.2*y)
+}.scope
+)
 */
+
