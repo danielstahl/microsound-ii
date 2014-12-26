@@ -31,9 +31,8 @@ case class MusicPlayer() {
     playThread.start()
   }
 
-  def sendNew(arguments: Seq[Object], deltaTime: Long) = {
-    sendBundle(Seq(makeNew(arguments)), deltaTime)
-  }
+  def sendNew(deltaTime: Long, messages: Seq[Object]*) =
+    sendBundle(deltaTime, messages.map(message => makeNew(message)).toSeq)
 
   private def makeOSCMessage(name: String, arguments: Seq[Object]): OSCMessage = {
     val theMessages = new ju.ArrayList[Object](arguments.size)
@@ -109,7 +108,7 @@ case class MusicPlayer() {
     }
   })
 
-  def sendBundle(messages: Seq[OSCPacket], deltaTime: Long) = {
+  def sendBundle(deltaTime: Long, messages: Seq[OSCPacket]) = {
     val theTime = new ju.Date(clock.start + deltaTime)
     playQueue.offer(ComparableBundle(makeOSCBundle(messages, theTime)))
   }

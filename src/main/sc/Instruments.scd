@@ -17,6 +17,31 @@ SynthDef(\pulse, {
 	Out.ar(out, pulse * amp);
 }).add;
 
+
+SynthDef(\pulseASR, {
+	arg dur = 1, amp, out = 0,
+	freqAttack, freqSustain, freqDecayStart, freqDecayEnd,
+	freqAttackTime, freqSustainTime, freqDecayTime,
+	widthAttack, widthSustain, widthDecayStart, widthDecayEnd,
+	widthAttackTime, widthSustainTime, widthDecayTime;
+	var pulse, freqEnv, widthEnv;
+	freqEnv = Env(
+		levels:[freqAttack, freqSustain, freqDecayStart, freqDecayEnd],
+		times: [freqAttackTime, freqSustainTime, freqDecayTime],
+		curve: \sin);
+	freqEnv.duration = dur;
+	widthEnv = Env(
+		levels: [widthAttack, widthSustain, widthDecayStart, widthDecayEnd],
+		times: [widthAttackTime, widthSustainTime, widthDecayTime],
+		curve: \sin);
+	widthEnv.duration = dur;
+	pulse = Pulse.ar(
+		EnvGen.kr(freqEnv, doneAction: 2),
+		EnvGen.kr(widthEnv));
+	Out.ar(out, pulse * amp);
+
+}).add;
+
 SynthDef(\filt, {
 	arg dur = 1, amp = 1, startFreq, endFreq, startBw, endBw, in = 0, out = 0;
 	var filt, freqEnv, bwEnv, input;
@@ -28,7 +53,35 @@ SynthDef(\filt, {
 	Out.ar(out, filt * amp);
 }).add;
 
-SynthDef(\filtRA, {
+SynthDef(\filtASR, {
+	arg dur = 1, amp = 1, in = 0, out = 0,
+	freqAttack, freqSustain, freqDecayStart, freqDecayEnd,
+	freqAttackTime, freqSustainTime, freqDecayTime,
+	bwAttack, bwSustain, bwDecayStart, bwDecayEnd,
+	bwAttackTime, bwSustainTime, bwDecayTime;
+	var filt, freqEnv, bwEnv, input;
+
+	freqEnv = Env(
+		levels:[freqAttack, freqSustain, freqDecayStart, freqDecayEnd],
+		times: [freqAttackTime, freqSustainTime, freqDecayTime],
+		curve: \sin);
+	freqEnv.duration = dur;
+	bwEnv = Env(
+		levels: [bwAttack, bwSustain, bwDecayStart, bwDecayEnd],
+		times: [bwAttackTime, bwSustainTime, bwDecayTime],
+		curve: \sin);
+	bwEnv.duration = dur;
+
+	input = In.ar(in, 1);
+	filt = BPF.ar(input,
+		EnvGen.kr(freqEnv, doneAction: 2),
+		EnvGen.kr(bwEnv));
+	filt = Balance.ar(filt, input);
+	Out.ar(out, filt * amp);
+}).add;
+
+
+SynthDef(\filtReplace, {
 	arg dur = 1, amp = 1, startFreq, endFreq, startBw, endBw, in = 0;
 	var filt, freqEnv, bwEnv, input;
 	freqEnv = Line.kr(startFreq, endFreq, dur, doneAction:2);
@@ -39,6 +92,35 @@ SynthDef(\filtRA, {
 	ReplaceOut.ar(in, filt * amp);
 }).add;
 
+SynthDef(\filtReplaceASR, {
+	arg dur = 1, amp = 1, in = 0,
+	freqAttack, freqSustain, freqDecayStart, freqDecayEnd,
+	freqAttackTime, freqSustainTime, freqDecayTime,
+	bwAttack, bwSustain, bwDecayStart, bwDecayEnd,
+	bwAttackTime, bwSustainTime, bwDecayTime;
+	var filt, freqEnv, bwEnv, input;
+
+	freqEnv = Env(
+		levels:[freqAttack, freqSustain, freqDecayStart, freqDecayEnd],
+		times: [freqAttackTime, freqSustainTime, freqDecayTime],
+		curve: \sin);
+	freqEnv.duration = dur;
+
+	bwEnv = Env(
+		levels: [bwAttack, bwSustain, bwDecayStart, bwDecayEnd],
+		times: [bwAttackTime, bwSustainTime, bwDecayTime],
+		curve: \sin);
+	bwEnv.duration = dur;
+
+	input = In.ar(in, 1);
+	filt = BPF.ar(input,
+		EnvGen.kr(freqEnv, doneAction: 2),
+		EnvGen.kr(bwEnv));
+	filt = Balance.ar(filt, input);
+	ReplaceOut.ar(in, filt * amp);
+}).add;
+
+
 SynthDef(\limit, {
 	arg level = 1, dur = 0.01, in = 0, out = 0;
 	var input;
@@ -46,7 +128,7 @@ SynthDef(\limit, {
 	Out.ar(out, Limiter.ar(input, level, dur));
 }).add;
 
-SynthDef(\limitRA, {
+SynthDef(\limitReplace, {
 	arg level = 1, dur = 0.01, in = 0;
 	var input;
 	input = In.ar(in, 1);
@@ -61,7 +143,7 @@ SynthDef(\pan, {
 	Out.ar(out, LinPan2.ar(input, panEnv));
 }).add;
 
-SynthDef(\arVolume, {
+SynthDef(\volumeAR, {
 	arg dur = 1, ampMin = 0.00001, ampMax = 1,
 	attackTime = 0.5, attackType = \linear, releaseType = \linear,
 	in = 0, out = 0;
@@ -75,7 +157,35 @@ SynthDef(\arVolume, {
 	Out.ar(out, input * ampEnv);
 }).add;
 
-SynthDef(\lineVolume, {
+SynthDef(\monoVolumeAR, {
+	arg dur = 1, ampMin = 0.00001, ampMax = 1,
+	attackTime = 0.5, attackType = \linear, releaseType = \linear,
+	in = 0, out = 0;
+	var ampEnv, input;
+	ampEnv =
+	EnvGen.kr(
+		Env([ampMin,ampMax,ampMin],
+			[(attackTime * dur),((1 - attackTime) * dur)],
+			[attackType, releaseType]), doneAction:2);
+	input = In.ar(in, 1);
+	Out.ar(out, input * ampEnv);
+}).add;
+
+SynthDef(\monoVolumeARReplace, {
+	arg dur = 1, ampMin = 0.00001, ampMax = 1,
+	attackTime = 0.5, attackType = \linear, releaseType = \linear,
+	in = 0;
+	var ampEnv, input;
+	ampEnv =
+	EnvGen.kr(
+		Env([ampMin,ampMax,ampMin],
+			[(attackTime * dur),((1 - attackTime) * dur)],
+			[attackType, releaseType]), doneAction:2);
+	input = In.ar(in, 1);
+	ReplaceOut.ar(in, input * ampEnv);
+}).add;
+
+SynthDef(\volumeLine, {
 	arg dur = 1, startAmp = 1, endAmp = 1, in = 0, out = 0;
 	var ampEnv, input;
 	ampEnv = Line.kr(startAmp, endAmp, dur, doneAction:2);
@@ -84,12 +194,82 @@ SynthDef(\lineVolume, {
 	Out.ar(out, input * ampEnv);
 }).add;
 
+SynthDef(\monoVolumeLine, {
+	arg dur = 1, startAmp = 1, endAmp = 1, in = 0, out = 0;
+	var ampEnv, input;
+	ampEnv = Line.kr(startAmp, endAmp, dur, doneAction:2);
+
+	input = In.ar(in, 1);
+	Out.ar(out, input * ampEnv);
+}).add;
+
+SynthDef(\monoVolumeLineReplace, {
+	arg dur = 1, startAmp = 1, endAmp = 1, in = 0;
+	var ampEnv, input;
+	ampEnv = Line.kr(startAmp, endAmp, dur, doneAction:2);
+
+	input = In.ar(in, 1);
+	ReplaceOut.ar(in, input * ampEnv);
+}).add;
+
+SynthDef(\volumeASR, {
+	arg dur = 1, in = 0, out = 0,
+	ampAttack = 0.00001, ampSustain, ampDecayStart, ampDecayEnd = 0.00001,
+	ampAttackTime, ampSustainTime, ampDecayTime;
+
+	var ampEnv, input;
+
+	ampEnv = Env(
+		levels:[ampAttack, ampSustain, ampDecayStart, ampDecayEnd],
+		times: [ampAttackTime, ampSustainTime, ampDecayTime],
+		curve: \sin);
+	ampEnv.duration = dur;
+
+	input = In.ar(in, 2);
+	Out.ar(out, input * EnvGen.kr(ampEnv, doneAction:2));
+}).add;
+
+SynthDef(\monoVolumeASR, {
+	arg dur = 1, in = 0, out = 0,
+	ampAttack = 0.00001, ampSustain, ampDecayStart, ampDecayEnd = 0.00001,
+	ampAttackTime, ampSustainTime, ampDecayTime;
+
+	var ampEnv, input;
+
+	ampEnv = Env(
+		levels:[ampAttack, ampSustain, ampDecayStart, ampDecayEnd],
+		times: [ampAttackTime, ampSustainTime, ampDecayTime],
+		curve: \sin);
+	ampEnv.duration = dur;
+
+	input = In.ar(in, 1);
+	Out.ar(out, input * EnvGen.kr(ampEnv, doneAction:2));
+}).add;
+
+SynthDef(\monoVolumeASR, {
+	arg dur = 1, in = 0,
+	ampAttack = 0.00001, ampSustain, ampDecayStart, ampDecayEnd = 0.00001,
+	ampAttackTime, ampSustainTime, ampDecayTime;
+
+	var ampEnv, input;
+
+	ampEnv = Env(
+		levels:[ampAttack, ampSustain, ampDecayStart, ampDecayEnd],
+		times: [ampAttackTime, ampSustainTime, ampDecayTime],
+		curve: \sin);
+	ampEnv.duration = dur;
+
+	input = In.ar(in, 1);
+	ReplaceOut.ar(in, input * EnvGen.kr(ampEnv, doneAction:2));
+}).add;
+
 SynthDef(\reverb, {
-	arg in = 0, out = 0, predelay = 0.048, combMinTime = 0.01, combDelayTime = 0.1, combDecay = 5,
-	numAllpass = 6, allpassMinTime = 0.001 ,allpassDelayTime = 0.05, allpassDecaytime = 1;
+	arg in = 0, out = 0, predelay = 0.048,
+	combMinTime = 0.01, combDelayTime = 0.1, combDecay = 5,
+	numAllpass = 6, allpassMinTime = 0.001, allpassDelayTime = 0.05, allpassDecaytime = 1;
 	var input, numc, temp, numComb;
 
-	input=In.ar(in, 2); //get two channels of input
+	input= In.ar(in, 2); //get two channels of input
 
 	numComb = 4; // number of comb delays
 
@@ -128,6 +308,7 @@ Synth("lineVolume", [dur: 10, in: 20, startAmp: 1, endAmp: 1],addAction:\addToTa
 Synth("lineVolume", [dur: 10, in: 22, startAmp: 0.03, endAmp: 0.03],addAction:\addToTail);
 )
 
+
 /*
 "http://ecmc.rochester.edu/ecmc/docs/supercollider/scbook/Ch21_Interface_Investigations/ixi SC tutorial/ixi_SC_tutorial_12.html"
 */
@@ -151,7 +332,7 @@ a.set(\revVol, 0.048)
 (
 Synth("pulse", [dur: 10, amp: 0.01, startFreq: 0.8, endFreq: 0.4, startWidth: 0.2, endWidth: 0.22, out: 16], addAction:\addToTail);
 Synth("filt", [dur: 10, amp: 0.3, startFreq: 2000, endFreq: 3000, startBw: 0.000001, endBw: 0.000001, in: 16, out: 17], addAction:\addToTail);
-Synth("limitRA", [level: 0.3, in: 17], addAction:\addToTail);
+Synth("limitReplace", [level: 0.3, in: 17], addAction:\addToTail);
 Synth("pan", [dur: 10, startPan: -1, endPan: 1, in: 17, out: 18], addAction:\addToTail);
 Synth("reverb", [in: 18, out: 20, predelay: 0.048, combMinTime: 0.03, combDelayTime: 0.05, combDecay: 2.048, numAllpass: 6, allpassMinTime: 0.003, allpassDelayTime: 0.05, allpassDecaytime: 1.048, mix: 0.048], addAction:\addToTail);
 Synth("lineVolume", [dur: 10, in: 18, startAmp: 1, endAmp: 1],addAction:\addToTail);
@@ -171,8 +352,8 @@ Synth("limit", [level: 0.4, in: 17, out: 0], addAction:\addToTail);
 /*Chain */
 (
 Synth("pulse", [dur: 12, startFreq: 3, endFreq: 5, startWidth: 0.1, endWidth: 0.9, out: 16], addAction:\addToTail);
-Synth("filtRA", [dur: 12, startFreq: 7000, endFreq: 8500, startBw: 0.000001, endBw: 0.000001, in: 16], addAction:\addToTail);
-Synth("filtRA", [dur: 12, startFreq: 7500, endFreq: 7700, startBw: 0.000001, endBw: 0.000001, in: 16], addAction:\addToTail);
+Synth("filtReplace", [dur: 12, startFreq: 7000, endFreq: 8500, startBw: 0.000001, endBw: 0.000001, in: 16], addAction:\addToTail);
+Synth("filtReplace", [dur: 12, startFreq: 7500, endFreq: 7700, startBw: 0.000001, endBw: 0.000001, in: 16], addAction:\addToTail);
 Synth("limit", [level: 0.4, in: 18], addAction:\addToTail);
 Synth("pan", [dur: 12, startPan: -1, endPan: 1, in: 16, out: 0], addAction:\addToTail);
 )
@@ -187,12 +368,36 @@ Synth("filt", [dur: 12, startFreq: 3030, endFreq: 3085, startBw: 0.0000001, endB
 /* Chain */
 (
 Synth("noise", [dur: 12, amp: 0.5, out: 16], addAction:\addToTail);
-Synth("filtRA", [dur: 12, startFreq: 3000, endFreq: 4000, startBw: 0.0000001, endBw: 0.00001, in: 16], addAction:\addToTail);
-Synth("filtRA", [dur: 12, startFreq: 3030, endFreq: 3085, startBw: 0.0000001, endBw: 0.00001, in: 16], addAction:\addToTail);
+Synth("filtReplace", [dur: 12, startFreq: 3000, endFreq: 4000, startBw: 0.0000001, endBw: 0.00001, in: 16], addAction:\addToTail);
+Synth("filtReplace", [dur: 12, startFreq: 3030, endFreq: 3085, startBw: 0.0000001, endBw: 0.00001, in: 16], addAction:\addToTail);
 Synth("pan", [dur: 12, startPan: -1, endPan: 1, in: 16, out: 0], addAction:\addToTail);
 )
 
 (
 Synth("pulse", [dur: 12, startFreq: 3, endFreq: 5, startWidth: 0.1, endWidth: 0.9, out: 16], addAction:\addToTail);
 Synth("pan", [dur: 12, startPan: -1, endPan: 1, in: 16, out: 17], addAction:\addToTail);
+)
+
+(
+Synth("pulseASR", [dur: 10, amp: 1, out: 0,
+	freqAttack: 20, freqSustain: 5, freqDecayStart: 3, freqDecayEnd: 10,
+	freqAttackTime: 1, freqSustainTime: 8, freqDecayTime: 2,
+	widthAttack: 0.1, widthSustain: 0.5, widthDecayStart: 0.4, widthDecayEnd: 0.9,
+	widthAttackTime: 1, widthSustainTime: 5, widthDecayTime: 2], addAction: \addToTail);
+)
+
+(
+Synth("pulse", [dur: 10, amp: 0.01, startFreq: 3, endFreq: 10, startWidth: 0.4, endWidth: 0.60, out: 16], addAction:\addToTail);
+Synth("pan", [dur: 10, startPan: -1, endPan: 1, in: 16, out: 18], addAction:\addToTail);
+Synth("volumeAR", [dur: 10, in: 18],addAction:\addToTail);
+)
+
+(
+Synth("pulse", [dur: 10, amp: 0.01, startFreq: 3, endFreq: 10, startWidth: 0.4, endWidth: 0.60, out: 16], addAction:\addToTail);
+Synth("monoVolumeAR", [dur: 10, in: 16, out: 0],addAction:\addToTail);
+)
+
+(
+Synth("pulse", [dur: 10, amp: 0.01, startFreq: 3, endFreq: 10, startWidth: 0.4, endWidth: 0.60, out: 0], addAction:\addToTail);
+Synth("monoVolumeARReplace", [dur: 10, in: 0],addAction:\addToTail);
 )

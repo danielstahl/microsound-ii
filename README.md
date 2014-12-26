@@ -1,4 +1,4 @@
 microsound-ii
 =============
 
-The second microsound piece
+The second microsound piece.
