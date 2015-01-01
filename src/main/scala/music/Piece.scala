@@ -3,7 +3,9 @@ package music
 import java.lang.Float
 import java.{lang => jl}
 
-import music.Spectrum._
+import Spectrum._
+import Instruments._
+import Utils._
 
 /**
  * Main class for the piece
@@ -314,387 +316,136 @@ underSpectrum
 149: 0.082614906
  */
 object Piece {
+  val overSpectrum = makeSpectrum(40, phi, 150)
+  val underSpectrum = makeInvertedSpectrum(40, phi, 150)
 
-  sealed case class EnvCurve(name: String)
-  object LINEAR extends EnvCurve("line")
-  object SINE extends EnvCurve("sin")
-  object EXPONENTIAL extends EnvCurve("exp")
-  object WELCH extends EnvCurve("wel")
-  object SQUARED extends EnvCurve("sqr")
-  object CUBED extends EnvCurve("cub")
+  /**
+   * The first movement.
+   * The idea is to have two main layers
+   * 1. A slow pulse with a slowly evolving freq (about 0.5/second)
+   * and width (0.5 - 0.1)
+   * 2. A noise that crossfade from white to pink
+   * with a slowly moving filter.
+   */
+  def firstMovement(): Unit = {
+    val player: MusicPlayer = MusicPlayer()
 
-  sealed case class AddAction(action: Integer)
-  object HEAD_ACTION extends AddAction(new Integer(0))
-  object TAIL_ACTION extends AddAction(new Integer(1))
-  object BEFORE_ACTION extends AddAction(new Integer(2))
-  object AFTER_ACTION extends AddAction(new Integer(2))
+    player.startPlay()
 
-  sealed case class Node(nodeId: Integer)
-  object SOURCE extends Node(1001)
-  object EFFECT extends Node(1002)
+    val pulse = pulseInstrument
+      .addAction(TAIL_ACTION)
+      .out(16f)
+      .dur(overSpectrum(1))
+      .amp(0.1f)
+      .freq(underSpectrum(114), underSpectrum(47))
+      .width(underSpectrum(24), underSpectrum(122))
+      .build()
 
+    val pulseFilter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .in(16f)
+      .out(17f)
+      .dur(overSpectrum(1))
+      .amp(0.005f)
+      .freq(overSpectrum(10), overSpectrum(11))
+      //.width(0.001f, 0.0001f)
+      .width(0.0000001f, 0.00000001f)
+      .build()
 
-  def setupNodes(player: MusicPlayer) = {
-    val osc = Seq(player.makeGroupHead(1, SOURCE.nodeId), player.makeGroupTail(SOURCE.nodeId, EFFECT.nodeId))
-    player.sendBundle(absoluteTimeToMillis(0f), osc)
+    val pulseFilterDelay = monoDelayReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(17f)
+      .dur(overSpectrum(1))
+      .delay(0.03f, 0.05f)
+      .build()
+
+    val pulsePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(overSpectrum(1))
+      .in(16f)
+      .out(0)
+      .pan(0.6f, 0.3f)
+      .build()
+
+    val filterPulsePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(overSpectrum(1))
+      .in(17f)
+      .out(0)
+      .pan(0.8f, 1f)
+      .build()
+
+    val pinkNoise = pinkNoiseInstrument
+      .addAction(TAIL_ACTION)
+      .out(18f)
+      .dur(overSpectrum(1))
+      .amp(0.5f)
+      .build()
+
+    val pinkNoiseVolume = monoVolumeLineReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(18f)
+      .dur(overSpectrum(1))
+      .amp(0.5f, 0.0f)
+      .build()
+
+    val pinkNoisePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(overSpectrum(1))
+      .in(18f)
+      .out(0)
+      .pan(-0.8f, -0.6f)
+      .build()
+
+    val whiteNoise = whiteNoiseInstrument
+      .addAction(TAIL_ACTION)
+      .out(19f)
+      .dur(overSpectrum(1))
+      .amp(0.5f)
+      .build()
+
+    val whiteNoiseVolume = monoVolumeLineReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(19f)
+      .dur(overSpectrum(1))
+      .amp(0.0f, 0.5f)
+      .build()
+
+    val whiteNoisePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(overSpectrum(1))
+      .in(19f)
+      .out(0)
+      .pan(-0.2f, -0.4f)
+      .build()
+
+    val whiteNoiseFilter = filterRejectInstrument
+      .addAction(TAIL_ACTION)
+      .in(19f)
+      .out(20f)
+      .dur(overSpectrum(1))
+      .amp(0.5f)
+      .freq(overSpectrum(1), overSpectrum(0))
+      .width(1.8f, 0.9f)
+      .build()
+
+    val whiteNoiseFilterPan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(overSpectrum(1))
+      .in(12f)
+      .out(0)
+      .pan(-1f, -0.8f)
+      .build()
+
+    setupNodes(player)
+    //player.sendNew(absoluteTimeToMillis(0f), pulse, pulseFilter)
+    player.sendNew(absoluteTimeToMillis(0f),
+      pulse, pulseFilter, pulseFilterDelay, pulsePan, filterPulsePan,
+      pinkNoise, pinkNoiseVolume, pinkNoisePan,
+      whiteNoise, whiteNoiseVolume, whiteNoisePan, whiteNoiseFilter, whiteNoiseFilterPan)
+    Thread.sleep(1000)
   }
 
-  trait ArgumentBuilder {
-    type SelfType
-    def self(): SelfType
-    def buildFloat(value: Float): jl.Float = new jl.Float(value)
-  }
-
-  abstract class InstrumentBuilder extends ArgumentBuilder {
-    val instrumentName: String
-
-    var addAction: AddAction = HEAD_ACTION
-
-    def addAction(value: AddAction): SelfType = {
-      addAction = value
-      self()
-    }
-
-    var nodeId: Node = SOURCE
-
-    def nodeId(value: Node): SelfType = {
-      nodeId = value
-      self()
-    }
-
-    def build(): Seq[Object] = {
-      Seq(
-        instrumentName,
-        new Integer(-1), addAction.action, nodeId.nodeId
-      )
-    }
-  }
-
-  trait ASRBuilder extends ArgumentBuilder {
-    val attackName: String
-    val sustainName: String
-    val decayStartName: String
-    val decayEndName: String
-    val attackTimeName: String
-    val sustainTimeName: String
-    val decayTimeName: String
-
-    var attack: jl.Float = buildFloat(0f)
-
-    def attack(value: Float): SelfType = {
-      attack = buildFloat(value)
-      self()
-    }
-
-    var sustain: jl.Float = buildFloat(0f)
-
-    def sustain(value: Float): SelfType = {
-      sustain = buildFloat(value)
-      self()
-    }
-
-    var decayStart: jl.Float = buildFloat(0f)
-
-    def decayStart(value: Float): SelfType = {
-      decayStart = buildFloat(value)
-      self()
-    }
-
-    var decayEnd: jl.Float = buildFloat(0f)
-
-    def decayEnd(value: Float): SelfType = {
-      decayEnd = buildFloat(value)
-      self()
-    }
-
-    var attackTime: jl.Float = buildFloat(0f)
-
-    def attackTime(value: Float): SelfType = {
-      attackTime = buildFloat(value)
-      self()
-    }
-
-    var sustainTime: jl.Float = buildFloat(0f)
-
-    def sustainTime(value: Float): SelfType = {
-      sustainTime = buildFloat(value)
-      self()
-    }
-
-    var decayTime: jl.Float = buildFloat(0f)
-
-    def decayTime(value: Float): SelfType = {
-      decayTime = buildFloat(value)
-      self()
-    }
-
-    def values(attackVal: Float, sustainVal: Float, decayStartVal: Float, decayEndVal: Float): SelfType = {
-      attack = attackVal
-      sustain = sustainVal
-      decayStart = decayStartVal
-      decayEnd = decayEndVal
-      self()
-    }
-
-    def times(attackTimeVal: Float, sustainTimeVal: Float, decayTimeVal: Float): SelfType = {
-      attackTime = attackTimeVal
-      sustainTime = sustainTimeVal
-      decayTime = decayTimeVal
-      self()
-    }
-
-    def buildASR(): Seq[Object] = Seq(
-      attackName, attack,
-      sustainName, sustain,
-      decayStartName, decayStart,
-      decayEndName, decayEnd,
-      attackTimeName, attackTime,
-      sustainTimeName, sustainTime,
-      decayTimeName, decayTime
-    )
-  }
-
-  case class FreqASRBuilder[ST](me: ST) extends ASRBuilder {
-    override type SelfType = ST
-    override def self(): SelfType = me
-
-    val attackName ="freqAttack"
-    val sustainName = "freqSustain"
-    val decayStartName ="freqDecayStart"
-    val decayEndName ="freqDecayEnd"
-    val attackTimeName ="freqAttackTime"
-    val sustainTimeName ="freqSustainTime"
-    val decayTimeName ="freqDecayTime"
-  }
-
-  case class WidthASRBuilder[ST](me: ST) extends ASRBuilder {
-    override type SelfType = ST
-    override def self(): SelfType = me
-
-    val attackName ="widthAttack"
-    val sustainName = "widthSustain"
-    val decayStartName ="widthDecayStart"
-    val decayEndName ="widthDecayEnd"
-    val attackTimeName ="widthAttackTime"
-    val sustainTimeName ="widthSustainTime"
-    val decayTimeName ="widthDecayTime"
-  }
-
-  case class BwASRBuilder[ST](me: ST) extends ASRBuilder {
-    override type SelfType = ST
-    override def self(): SelfType = me
-
-    val attackName ="bwAttack"
-    val sustainName = "bwSustain"
-    val decayStartName ="bwDecayStart"
-    val decayEndName ="bwDecayEnd"
-    val attackTimeName ="bwAttackTime"
-    val sustainTimeName ="bwSustainTime"
-    val decayTimeName ="bwDecayTime"
-  }
-
-  trait DurBuilder extends ArgumentBuilder {
-    var dur: jl.Float = buildFloat(1f)
-
-    def dur(value: Float): SelfType = {
-      dur = buildFloat(value)
-      self()
-    }
-
-    def buildDur(): Seq[Object] = Seq("dur", dur)
-  }
-
-  trait AmpBuilder extends ArgumentBuilder {
-
-    var amp: jl.Float = buildFloat(1f)
-
-    def amp(value: Float): SelfType = {
-      amp = buildFloat(value)
-      self()
-    }
-
-    def buildAmp(): Seq[Object] = Seq("amp", amp)
-  }
-
-  trait OutputBuilder extends ArgumentBuilder {
-    var out: jl.Float = buildFloat(0f)
-
-    def out(value: Float): SelfType = {
-      out = buildFloat(value)
-      self()
-    }
-
-    def buildOut(): Seq[Object] = Seq("out", out)
-  }
-
-  trait InputBuilder extends ArgumentBuilder {
-    var in: jl.Float = buildFloat(0f)
-
-    def in(value: Float): SelfType = {
-      in = buildFloat(value)
-      self()
-    }
-
-    def buildIn(): Seq[Object] = Seq("in", in)
-  }
-
-  trait CommonFilterInstrumentBuilder extends InstrumentBuilder {
-    var startFreq: jl.Float = _
-    var endFreq: jl.Float = _
-
-    def freq(start: Float, end: Float): SelfType = {
-      startFreq = buildFloat(start)
-      endFreq = buildFloat(end)
-      self()
-    }
-
-    var startBw: jl.Float = _
-    var endBw: jl.Float = _
-
-    def width(start: Float, end: Float): SelfType = {
-      startBw = buildFloat(start)
-      endBw = buildFloat(end)
-      self()
-    }
-
-    def buildCommonFilter(): Seq[Object] = Seq(
-      "startFreq", startFreq,
-      "endFreq", endFreq,
-      "startBw", startBw,
-      "endBw", endBw
-    )
-
-  }
-
-  class FilterInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with CommonFilterInstrumentBuilder with InputBuilder with OutputBuilder {
-    type SelfType = FilterInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "filt"
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildIn() ++
-        buildOut() ++
-        buildAmp() ++
-        buildDur() ++
-        buildCommonFilter()
-  }
-
-  class FilterASRInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with InputBuilder with OutputBuilder {
-    type SelfType = FilterASRInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "filtASR"
-
-    val freqASRBuilder = FreqASRBuilder[FilterASRInstrumentBuilder](this)
-    val bwASRBuilder = BwASRBuilder[FilterASRInstrumentBuilder](this)
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildIn() ++
-        buildOut() ++
-        buildAmp() ++
-        buildDur() ++
-        freqASRBuilder.buildASR() ++
-        bwASRBuilder.buildASR()
-  }
-
-  class FilterReplaceInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with CommonFilterInstrumentBuilder with InputBuilder {
-    type SelfType = FilterReplaceInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "filtReplace"
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildIn() ++
-        buildAmp() ++
-        buildDur() ++
-        buildCommonFilter()
-  }
-
-  class FilterReplaceASRInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with InputBuilder {
-    type SelfType = FilterReplaceASRInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "filtReplaceASR"
-
-    val freqASRBuilder = FreqASRBuilder[FilterReplaceASRInstrumentBuilder](this)
-    val bwASRBuilder = BwASRBuilder[FilterReplaceASRInstrumentBuilder](this)
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildIn() ++
-        buildAmp() ++
-        buildDur() ++
-        freqASRBuilder.buildASR() ++
-        bwASRBuilder.buildASR()
-  }
-
-  class PulseInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with OutputBuilder {
-    type SelfType = PulseInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "pulse"
-
-    var startFreq: jl.Float = _
-    var endFreq: jl.Float = _
-
-    def freq(start: Float, end: Float): PulseInstrumentBuilder = {
-      startFreq = buildFloat(start)
-      endFreq = buildFloat(end)
-      this
-    }
-
-    var startWidth: jl.Float = _
-    var endWidth: jl.Float = _
-
-    def width(start: Float, end: Float): PulseInstrumentBuilder = {
-      startWidth = buildFloat(start)
-      endWidth = buildFloat(end)
-      this
-    }
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildOut() ++
-        buildAmp() ++
-        buildDur() ++
-        Seq(
-          "startFreq", startFreq,
-          "endFreq", endFreq,
-          "startWidth", startWidth,
-          "endWidth", endWidth
-        )
-  }
-
-  class PulseASRInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with OutputBuilder {
-    type SelfType = PulseASRInstrumentBuilder
-    def self(): SelfType = this
-
-    val instrumentName: String = "pulseASR"
-
-    val freqASRBuilder = FreqASRBuilder[PulseASRInstrumentBuilder](this)
-    val widthASRBuilder = WidthASRBuilder[PulseASRInstrumentBuilder](this)
-
-    override def build(): Seq[Object] =
-      super.build() ++
-        buildOut() ++
-        buildAmp() ++
-        buildDur() ++
-        freqASRBuilder.buildASR() ++
-        widthASRBuilder.buildASR()
-  }
-
-  def pulseInstrument = new PulseInstrumentBuilder
-  def pulseASRInstrument = new PulseASRInstrumentBuilder
-  def filterInstrument = new FilterInstrumentBuilder
-  def filterASRInstrument = new FilterASRInstrumentBuilder
-  def filterReplaceInstrument = new FilterReplaceInstrumentBuilder
-  def filterReplaceASRInstrument = new FilterReplaceASRInstrumentBuilder
-
-  def absoluteTimeToMillis(time: Float): Long = (time * 1000).round.toLong
 
   def makeSeqWithIndex[T](seq: Seq[T]) = {
     0 until seq.size map {
@@ -703,11 +454,14 @@ object Piece {
   }
 
   def main(args: Array[String]): Unit = {
+    firstMovement()
+  }
+
+  def scratch(): Unit = {
     val player: MusicPlayer = MusicPlayer()
 
     println(s"fact is $phi")
-    val overSpectrum = makeSpectrum(40, phi, 150)
-    val underSpectrum = makeInvertedSpectrum(40, phi, 150)
+
     println(s"overSpectrum")
     makeSeqWithIndex(overSpectrum).foreach { case (i, v) => println(s"$i: $v")}
     println(s"underSpectrum")

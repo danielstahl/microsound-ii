@@ -21,3 +21,9 @@ s.dumpOSC(0);
 
 // Find the first private bus
 s.options.firstPrivateBus;
+
+(
+// a synthdef browswer
+SynthDescLib.global.read;
+SynthDescLib.global.browse;
+)
