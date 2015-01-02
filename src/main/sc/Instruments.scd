@@ -28,7 +28,7 @@ SynthDef(\pinkNoise, {
 }).add;
 
 SynthDef(\lineControl, {
-	arg dur = 1, startValue = 1, endValue = 1, out;
+	arg dur = 1, startValue = 1, endValue = 1, out = 0;
 	var lineEnv;
 	lineEnv = Line.kr(startValue, endValue, dur, doneAction:2);
 	Out.kr(out, lineEnv);

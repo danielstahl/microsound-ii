@@ -319,6 +319,32 @@ object Piece {
   val overSpectrum = makeSpectrum(40, phi, 150)
   val underSpectrum = makeInvertedSpectrum(40, phi, 150)
 
+
+  def firstMovement2(): Unit = {
+    val player: MusicPlayer = MusicPlayer()
+
+    player.startPlay()
+
+    val pinkNoiseVolume = new LineControlInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .out(0f)
+      .dur(overSpectrum(1))
+      .control(0.5f, 0.0f)
+      .build()
+
+    val pinkNoise = new PinkNoiseInstrumentBuilder2()
+      .addAction(TAIL_ACTION)
+      .out(0f)
+      .dur(overSpectrum(1))
+      .ampBus.bus(0f)
+      .build()
+
+
+    setupNodes(player)
+    player.sendNew(absoluteTimeToMillis(0f), pinkNoiseVolume, pinkNoise)
+    Thread.sleep(1000)
+  }
+
   /**
    * The first movement.
    * The idea is to have two main layers
@@ -454,7 +480,8 @@ object Piece {
   }
 
   def main(args: Array[String]): Unit = {
-    firstMovement()
+    //firstMovement()
+    firstMovement2()
   }
 
   def scratch(): Unit = {

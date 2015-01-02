@@ -60,6 +60,22 @@ object Instruments {
     }
   }
 
+  case class BusArgumentBuilder[ST](me: ST, name: String) extends ArgumentBuilder {
+    override type SelfType = ST
+    override def self(): SelfType = me
+
+    var bus: jl.Float = buildFloat(0f)
+
+    def bus(value: Float): SelfType = {
+      bus = buildFloat(value)
+      self()
+    }
+
+    def buildBus(): Seq[Object] = Seq(
+      name, bus
+    )
+  }
+
   trait ASRBuilder extends ArgumentBuilder {
     val attackName: String
     val sustainName: String
@@ -228,7 +244,33 @@ object Instruments {
     def buildIn(): Seq[Object] = Seq("in", in)
   }
 
-  trait CommonFilterInstrumentBuilder extends InstrumentBuilder {
+
+  class LineControlInstrumentBuilder extends InstrumentBuilder with DurBuilder with OutputBuilder {
+    type SelfType = LineControlInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "lineControl"
+
+    var startValue: jl.Float = _
+    var endValue: jl.Float = _
+
+    def control(start: Float, end: Float): SelfType = {
+      startValue = buildFloat(start)
+      endValue = buildFloat(end)
+      self()
+    }
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildOut() ++
+        buildDur() ++
+        Seq(
+          "startValue", startValue,
+          "endValue", endValue
+        )
+  }
+
+   trait CommonFilterInstrumentBuilder extends InstrumentBuilder {
     var startFreq: jl.Float = _
     var endFreq: jl.Float = _
 
@@ -357,6 +399,24 @@ object Instruments {
         buildAmp() ++
         buildDur()
   }
+
+  abstract class CommonNoiseInstrumentBuilder2 extends InstrumentBuilder with DurBuilder with OutputBuilder {
+    val ampBus = BusArgumentBuilder[SelfType](self(), "ampBus")
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildOut() ++
+        ampBus.buildBus() ++
+        buildDur()
+  }
+
+  class PinkNoiseInstrumentBuilder2 extends CommonNoiseInstrumentBuilder2 {
+    type SelfType = PinkNoiseInstrumentBuilder2
+    def self(): SelfType = this
+
+    val instrumentName: String = "pinkNoise2"
+  }
+
   class PinkNoiseInstrumentBuilder extends CommonNoiseInstrumentBuilder {
     type SelfType = PinkNoiseInstrumentBuilder
     def self(): SelfType = this
@@ -369,6 +429,13 @@ object Instruments {
     def self(): SelfType = this
 
     val instrumentName: String = "whiteNoise"
+  }
+
+  class WhiteNoiseInstrumentBuilder2 extends CommonNoiseInstrumentBuilder2 {
+    type SelfType = WhiteNoiseInstrumentBuilder2
+    def self(): SelfType = this
+
+    val instrumentName: String = "whiteNoise2"
   }
 
   class PulseInstrumentBuilder extends InstrumentBuilder with DurBuilder with AmpBuilder with OutputBuilder {
