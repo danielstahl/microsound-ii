@@ -316,6 +316,9 @@ underSpectrum
 149: 0.082614906
  */
 object Piece {
+
+  import LineControlInstrumentBuilder._
+
   val overSpectrum = makeSpectrum(40, phi, 150)
   val underSpectrum = makeInvertedSpectrum(40, phi, 150)
 
@@ -327,16 +330,16 @@ object Piece {
 
     val pinkNoiseVolume = new LineControlInstrumentBuilder()
       .addAction(TAIL_ACTION)
-      .out(0f)
+      .out(0)
       .dur(overSpectrum(1))
       .control(0.5f, 0.0f)
       .build()
 
-    val pinkNoise = new PinkNoiseInstrumentBuilder2()
+    val pinkNoise = new PinkNoiseInstrumentBuilder()
       .addAction(TAIL_ACTION)
-      .out(0f)
+      .out(0)
       .dur(overSpectrum(1))
-      .ampBus.bus(0f)
+      .ampBus.bus(0)
       .build()
 
 
@@ -354,53 +357,56 @@ object Piece {
    * with a slowly moving filter.
    */
   def firstMovement(): Unit = {
+    BusGenerator.reset()
     val player: MusicPlayer = MusicPlayer()
 
     player.startPlay()
 
+    val dur = overSpectrum(1)
     val pulse = pulseInstrument
       .addAction(TAIL_ACTION)
-      .out(16f)
-      .dur(overSpectrum(1))
-      .amp(0.1f)
-      .freq(underSpectrum(114), underSpectrum(47))
-      .width(underSpectrum(24), underSpectrum(122))
-      .build()
+      .out(16)
+      .dur(dur)
+      .freqBus.control(line(dur, underSpectrum(114), underSpectrum(47)))
+      .widthBus.control(line(dur, underSpectrum(24), underSpectrum(122)))
+      .ampBus.control(line(dur, 0.1f, 0.1f))
+      .buildInstruments()
 
     val pulseFilter = filterInstrument
       .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(17f)
-      .dur(overSpectrum(1))
-      .amp(0.005f)
-      .freq(overSpectrum(10), overSpectrum(11))
-      //.width(0.001f, 0.0001f)
-      .width(0.0000001f, 0.00000001f)
-      .build()
+      .in(16)
+      .out(17)
+      .dur(dur)
+      .ampBus.control(line(dur, 0.005f, 0.005f))
+      .freqBus.control(line(dur, overSpectrum(10), overSpectrum(11)))
+      .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
+      .buildInstruments()
 
     val pulseFilterDelay = monoDelayReplaceInstrument
       .addAction(TAIL_ACTION)
-      .in(17f)
-      .dur(overSpectrum(1))
-      .delay(0.03f, 0.05f)
-      .build()
+      .in(17)
+      .dur(dur)
+      .delayBus.control(line(dur, 0.03f, 0.05f))
+      .maxDelay(0.05f)
+      .buildInstruments()
 
     val pulsePan = panInstrument
       .addAction(TAIL_ACTION)
-      .dur(overSpectrum(1))
-      .in(16f)
+      .dur(dur)
+      .in(16)
       .out(0)
-      .pan(0.6f, 0.3f)
-      .build()
+      .panBus.control(line(dur, 0.6f, 0.3f))
+      .buildInstruments()
 
     val filterPulsePan = panInstrument
       .addAction(TAIL_ACTION)
-      .dur(overSpectrum(1))
-      .in(17f)
+      .dur(dur)
+      .in(17)
       .out(0)
-      .pan(0.8f, 1f)
-      .build()
+      .panBus.control(line(dur, 0.8f, 1f))
+      .buildInstruments()
 
+    /*
     val pinkNoise = pinkNoiseInstrument
       .addAction(TAIL_ACTION)
       .out(18f)
@@ -462,13 +468,19 @@ object Piece {
       .out(0)
       .pan(-1f, -0.8f)
       .build()
+     */
 
     setupNodes(player)
-    //player.sendNew(absoluteTimeToMillis(0f), pulse, pulseFilter)
-    player.sendNew(absoluteTimeToMillis(0f),
-      pulse, pulseFilter, pulseFilterDelay, pulsePan, filterPulsePan,
-      pinkNoise, pinkNoiseVolume, pinkNoisePan,
-      whiteNoise, whiteNoiseVolume, whiteNoisePan, whiteNoiseFilter, whiteNoiseFilterPan)
+
+
+    val messages = pulse ++
+      pulseFilter ++
+      pulseFilterDelay ++
+      pulsePan ++
+      filterPulsePan
+    player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
+
+
     Thread.sleep(1000)
   }
 
@@ -480,126 +492,127 @@ object Piece {
   }
 
   def main(args: Array[String]): Unit = {
-    //firstMovement()
-    firstMovement2()
+    firstMovement()
+    //firstMovement2()
   }
 
-  def scratch(): Unit = {
-    val player: MusicPlayer = MusicPlayer()
+  /*
+ def scratch(): Unit = {
+   val player: MusicPlayer = MusicPlayer()
 
-    println(s"fact is $phi")
+   println(s"fact is $phi")
 
-    println(s"overSpectrum")
-    makeSeqWithIndex(overSpectrum).foreach { case (i, v) => println(s"$i: $v")}
-    println(s"underSpectrum")
-    makeSeqWithIndex(underSpectrum).foreach { case (i, v) => println(s"$i: $v")}
+   println(s"overSpectrum")
+   makeSeqWithIndex(overSpectrum).foreach { case (i, v) => println(s"$i: $v")}
+   println(s"underSpectrum")
+   makeSeqWithIndex(underSpectrum).foreach { case (i, v) => println(s"$i: $v")}
 
-    player.startPlay()
+   player.startPlay()
 
-    val pulse = pulseInstrument
-      .addAction(TAIL_ACTION)
-      .out(16f)
-      .dur(10f)
-      .amp(0.1f)
-      //.freq(0.8f, 0.4f)
-      .freq(underSpectrum(1), underSpectrum(10))
-      //.width(0.2f, 0.6f)
-      .width(underSpectrum(99), underSpectrum(48))
-      .build()
+   val pulse = pulseInstrument
+     .addAction(TAIL_ACTION)
+     .out(16f)
+     .dur(10f)
+     .amp(0.1f)
+     //.freq(0.8f, 0.4f)
+     .freq(underSpectrum(1), underSpectrum(10))
+     //.width(0.2f, 0.6f)
+     .width(underSpectrum(99), underSpectrum(48))
+     .build()
 
-    val pulseASR = pulseASRInstrument
-      .addAction(TAIL_ACTION)
-      .out(16f)
-      .dur(10f)
-      .amp(0.1f)
-      .freqASRBuilder.times(1f, 10f, 2f)
-      .freqASRBuilder.values(underSpectrum(2), underSpectrum(10), underSpectrum(4), underSpectrum(2))
-      .widthASRBuilder.times(1f, 10f, 2f)
-      .widthASRBuilder.values(underSpectrum(65), underSpectrum(48), underSpectrum(24), underSpectrum(13))
-      .build()
+   val pulseASR = pulseASRInstrument
+     .addAction(TAIL_ACTION)
+     .out(16f)
+     .dur(10f)
+     .amp(0.1f)
+     .freqASRBuilder.times(1f, 10f, 2f)
+     .freqASRBuilder.values(underSpectrum(2), underSpectrum(10), underSpectrum(4), underSpectrum(2))
+     .widthASRBuilder.times(1f, 10f, 2f)
+     .widthASRBuilder.values(underSpectrum(65), underSpectrum(48), underSpectrum(24), underSpectrum(13))
+     .build()
 
-    val filterASR1 = filterASRInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freqASRBuilder.times(1f, 10f, 2f)
-      .freqASRBuilder.values(overSpectrum(43), overSpectrum(44), overSpectrum(20), overSpectrum(19))
-      .bwASRBuilder.times(1f, 10f, 2f)
-      .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-      .build()
+   val filterASR1 = filterASRInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freqASRBuilder.times(1f, 10f, 2f)
+     .freqASRBuilder.values(overSpectrum(43), overSpectrum(44), overSpectrum(20), overSpectrum(19))
+     .bwASRBuilder.times(1f, 10f, 2f)
+     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
+     .build()
 
-    val filter1 = filterInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      //.freq(2000f, 4000f)
-      .freq(overSpectrum(44), overSpectrum(20))
-      .width(0.000001f, 0.000001f)
-      .build()
+   val filter1 = filterInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     //.freq(2000f, 4000f)
+     .freq(overSpectrum(44), overSpectrum(20))
+     .width(0.000001f, 0.000001f)
+     .build()
 
-    val filter2 = filterInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freq(overSpectrum(45), overSpectrum(25))
-      .width(0.000001f, 0.000001f)
-      .build()
+   val filter2 = filterInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freq(overSpectrum(45), overSpectrum(25))
+     .width(0.000001f, 0.000001f)
+     .build()
 
-    val filterASR2 = filterASRInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freqASRBuilder.times(1f, 10f, 2f)
-      .freqASRBuilder.values(overSpectrum(46), overSpectrum(45), overSpectrum(25), overSpectrum(26))
-      .bwASRBuilder.times(1f, 10f, 2f)
-      .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-      .build()
+   val filterASR2 = filterASRInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freqASRBuilder.times(1f, 10f, 2f)
+     .freqASRBuilder.values(overSpectrum(46), overSpectrum(45), overSpectrum(25), overSpectrum(26))
+     .bwASRBuilder.times(1f, 10f, 2f)
+     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
+     .build()
 
-    val filter3 = filterInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freq(overSpectrum(46), overSpectrum(52))
-      .width(0.000001f, 0.000001f)
-      .build()
+   val filter3 = filterInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freq(overSpectrum(46), overSpectrum(52))
+     .width(0.000001f, 0.000001f)
+     .build()
 
-    val filterASR3 = filterASRInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freqASRBuilder.times(1f, 10f, 2f)
-      .freqASRBuilder.values(overSpectrum(47), overSpectrum(46), overSpectrum(52), overSpectrum(53))
-      .bwASRBuilder.times(1f, 10f, 2f)
-      .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-      .build()
+   val filterASR3 = filterASRInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freqASRBuilder.times(1f, 10f, 2f)
+     .freqASRBuilder.values(overSpectrum(47), overSpectrum(46), overSpectrum(52), overSpectrum(53))
+     .bwASRBuilder.times(1f, 10f, 2f)
+     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
+     .build()
 
-    val filter4 = filterInstrument
-      .addAction(TAIL_ACTION)
-      .in(16f)
-      .out(0f)
-      .dur(10f)
-      .amp(0.1f)
-      .freq(overSpectrum(47), overSpectrum(60))
-      .width(0.000001f, 0.000001f)
-      .build()
+   val filter4 = filterInstrument
+     .addAction(TAIL_ACTION)
+     .in(16f)
+     .out(0f)
+     .dur(10f)
+     .amp(0.1f)
+     .freq(overSpectrum(47), overSpectrum(60))
+     .width(0.000001f, 0.000001f)
+     .build()
 
 
 
-    setupNodes(player)
-    //player.sendNew(absoluteTimeToMillis(0f), pulse, filter1, filter2, filter3, filter4)
-    player.sendNew(absoluteTimeToMillis(0f), pulseASR, filterASR1, filter2, filterASR3, filter4)
-    Thread.sleep(1000)
-  }
+   setupNodes(player)
+   //player.sendNew(absoluteTimeToMillis(0f), pulse, filter1, filter2, filter3, filter4)
+   player.sendNew(absoluteTimeToMillis(0f), pulseASR, filterASR1, filter2, filterASR3, filter4)
+   Thread.sleep(1000)
+ } */
 }
