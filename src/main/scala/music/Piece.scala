@@ -318,35 +318,132 @@ underSpectrum
 object Piece {
 
   import LineControlInstrumentBuilder._
+  import ARControlInstrumentBuilder._
+  import SineControlReplaceInstrumentBuilder._
 
   val overSpectrum = makeSpectrum(40, phi, 150)
   val underSpectrum = makeInvertedSpectrum(40, phi, 150)
 
 
-  def firstMovement2(): Unit = {
-    val player: MusicPlayer = MusicPlayer()
+  def makePulse(dur: Float): Seq[Seq[Object]] = {
+    val pulse = pulseInstrument
+    .addAction(TAIL_ACTION)
+    .out(16)
+    .dur(dur)
+    .freqBus.control(line(dur, underSpectrum(149), underSpectrum(98)))
+    .widthBus.control(line(dur, underSpectrum(48), underSpectrum(34)))
+    .ampBus.control(line(dur, 0.1f, 0.5f))
+    .buildInstruments()
 
-    player.startPlay()
-
-    val pinkNoiseVolume = new LineControlInstrumentBuilder()
+    val pulsePan = panInstrument
       .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(16)
       .out(0)
-      .dur(overSpectrum(1))
-      .control(0.5f, 0.0f)
-      .build()
+      .panBus.control(line(dur, 0.6f, 0.3f))
+      .buildInstruments()
 
-    val pinkNoise = new PinkNoiseInstrumentBuilder()
-      .addAction(TAIL_ACTION)
-      .out(0)
-      .dur(overSpectrum(1))
-      .ampBus.bus(0)
-      .build()
-
-
-    setupNodes(player)
-    player.sendNew(absoluteTimeToMillis(0f), pinkNoiseVolume, pinkNoise)
-    Thread.sleep(1000)
+    pulse ++ pulsePan
   }
+
+  def makePulseFilter1(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+    val pulseFilter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .in(16)
+      .out(soundBus)
+      .dur(dur)
+      .ampBus.control(line(dur, 0.003f, 0.0006f))
+      .freqBus.control(line(dur, overSpectrum(5), overSpectrum(6)))
+      .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
+      .buildInstruments()
+
+    val pulseFilterDelay = monoDelayReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .delayBus.control(ar(dur, 0.3f, (0.01f, 0.05f, 0.02f)), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f))
+      .maxDelay(0.05f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.6f, 0.9f), sine(dur, 0.6f, 0.5f, 0.05f, 0.06f))
+      .delayBus.control(line(dur, 0.07f, 0.09f), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f))
+      .maxDelay(0.09f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.3f, 1.4f), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f))
+      .delayBus.control(line(dur, 0.01f, 0.009f))
+      .maxDelay(0.09f)
+      .buildInstruments()
+
+    val filterPulsePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(soundBus)
+      .out(0)
+      .panBus.control(line(dur, -0.8f, -1f))
+      .buildInstruments()
+
+    pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
+  }
+
+  def makePulseFilter2(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+    val pulseFilter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .in(16)
+      .out(soundBus)
+      .dur(dur)
+      .ampBus.control(line(dur, 0.0005f, 0.0009f))
+      .freqBus.control(line(dur, overSpectrum(22), overSpectrum(10)))
+      .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
+      .buildInstruments()
+
+    val pulseFilterDelay = monoDelayReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .delayBus.control(ar(dur, 0.3f, (0.01f, 0.1f, 0.02f)), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f))
+      .maxDelay(0.2f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.2f, 1.3f), sine(dur, underSpectrum(40), underSpectrum(48), 0.05f, 0.06f))
+      .delayBus.control(line(dur, 0.1f, 0.2f), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f))
+      .maxDelay(0.09f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.3f, 1.4f))
+      .delayBus.control(line(dur, 1.6f, 1.9f), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f))
+      .maxDelay(0.09f)
+      .buildInstruments()
+
+    val filterPulsePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(soundBus)
+      .out(0)
+      .panBus.control(line(dur, -0.7f, -0.8f))
+      .buildInstruments()
+
+    pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
+  }
+
+
+
 
   /**
    * The first movement.
@@ -363,48 +460,7 @@ object Piece {
     player.startPlay()
 
     val dur = overSpectrum(1)
-    val pulse = pulseInstrument
-      .addAction(TAIL_ACTION)
-      .out(16)
-      .dur(dur)
-      .freqBus.control(line(dur, underSpectrum(114), underSpectrum(47)))
-      .widthBus.control(line(dur, underSpectrum(24), underSpectrum(122)))
-      .ampBus.control(line(dur, 0.1f, 0.1f))
-      .buildInstruments()
 
-    val pulseFilter = filterInstrument
-      .addAction(TAIL_ACTION)
-      .in(16)
-      .out(17)
-      .dur(dur)
-      .ampBus.control(line(dur, 0.005f, 0.005f))
-      .freqBus.control(line(dur, overSpectrum(10), overSpectrum(11)))
-      .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
-      .buildInstruments()
-
-    val pulseFilterDelay = monoDelayReplaceInstrument
-      .addAction(TAIL_ACTION)
-      .in(17)
-      .dur(dur)
-      .delayBus.control(line(dur, 0.03f, 0.05f))
-      .maxDelay(0.05f)
-      .buildInstruments()
-
-    val pulsePan = panInstrument
-      .addAction(TAIL_ACTION)
-      .dur(dur)
-      .in(16)
-      .out(0)
-      .panBus.control(line(dur, 0.6f, 0.3f))
-      .buildInstruments()
-
-    val filterPulsePan = panInstrument
-      .addAction(TAIL_ACTION)
-      .dur(dur)
-      .in(17)
-      .out(0)
-      .panBus.control(line(dur, 0.8f, 1f))
-      .buildInstruments()
 
     /*
     val pinkNoise = pinkNoiseInstrument
@@ -473,11 +529,10 @@ object Piece {
     setupNodes(player)
 
 
-    val messages = pulse ++
-      pulseFilter ++
-      pulseFilterDelay ++
-      pulsePan ++
-      filterPulsePan
+    val messages =
+      makePulse(dur) ++
+      makePulseFilter1(dur, 17) ++
+      makePulseFilter2(dur, 18)
     player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
 
 
@@ -492,6 +547,11 @@ object Piece {
   }
 
   def main(args: Array[String]): Unit = {
+    //println(s"overSpectrum")
+    //makeSeqWithIndex(overSpectrum).foreach { case (i, v) => println(s"$i: $v")}
+    //println(s"underSpectrum")
+    //makeSeqWithIndex(underSpectrum).foreach { case (i, v) => println(s"$i: $v")}
+
     firstMovement()
     //firstMovement2()
   }

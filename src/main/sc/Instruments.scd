@@ -235,7 +235,7 @@ SynthDef(\monoCombReplace, {
 	ReplaceOut.ar(in, CombL.ar(input, maxDelay, delay, decay));
 }).add;
 
-SynthDef(\monoAllpas, {
+SynthDef(\monoAllpass, {
 	arg dur = 1, in = 0, out = 0,
 	delayBus = 0, decayTimeBus = 1, maxDelay = 0.1;
 	var delay, decay, input;

@@ -199,8 +199,9 @@ object Instruments {
   }
 
   object SineControlReplaceInstrumentBuilder {
-    def sine(startFreq: Float, endFreq: Float, startAmp: Float, endAmp: Float): SineControlReplaceInstrumentBuilder = {
+    def sine(dur: Float, startFreq: Float, endFreq: Float, startAmp: Float, endAmp: Float): SineControlReplaceInstrumentBuilder = {
       new SineControlReplaceInstrumentBuilder()
+        .dur(dur)
         .freq(startFreq, endFreq)
         .amp(startAmp, endAmp)
     }
@@ -289,6 +290,15 @@ object Instruments {
         .values(values._1, values._2, values._3, values._4)
         .times(times._1, times._2, times._3)
         .dur(dur)
+    }
+  }
+
+  object ARControlInstrumentBuilder {
+    def ar(dur: Float, attackTime: Float, values: (Float, Float, Float), arType: (EnvCurve, EnvCurve) = (LINEAR, LINEAR)): ARControlInstrumentBuilder = {
+      new ARControlInstrumentBuilder()
+        .values(values._1, values._2, values._3)
+        .types(arType._1, arType._2)
+        .attackTime(attackTime)
     }
   }
 
@@ -589,6 +599,49 @@ object Instruments {
 
     val instrumentName: String = "monoCombReplace"
   }
+
+
+
+
+  abstract class CommonMonoAllpassInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder {
+    val delayBus = ControlArgumentBuilder[SelfType](self(), "delayBus")
+
+    val decayTimeBus = ControlArgumentBuilder[SelfType](self(), "decayTimeBus")
+
+    var maxDelay: jl.Float = buildFloat(0f)
+
+    def maxDelay(value: Float): SelfType = {
+      maxDelay = buildFloat(value)
+      self()
+    }
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildDur() ++
+        delayBus.buildBus() ++
+        decayTimeBus.buildBus() ++
+        Seq("maxDelay", maxDelay)
+  }
+
+  class MonoAllpassInstrumentBuilder extends CommonMonoCombInstrumentBuilder with OutputBuilder {
+    type SelfType = MonoAllpassInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "monoAllpass"
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildOut()
+  }
+
+  class MonoAllpassReplaceInstrumentBuilder extends CommonMonoCombInstrumentBuilder {
+    type SelfType = MonoAllpassReplaceInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "monoAllpassReplace"
+  }
+
 
   def lineControlInstrument = new LineControlInstrumentBuilder
   def pulseInstrument = new PulseInstrumentBuilder
