@@ -352,7 +352,7 @@ object Piece {
       .in(16)
       .out(soundBus)
       .dur(dur)
-      .ampBus.control(line(dur, 0.003f, 0.0006f))
+      .ampBus.control(line(dur, 0.004f, 0.0007f))
       .freqBus.control(line(dur, overSpectrum(5), overSpectrum(6)))
       .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
       .buildInstruments()
@@ -361,8 +361,8 @@ object Piece {
       .addAction(TAIL_ACTION)
       .in(soundBus)
       .dur(dur)
-      .delayBus.control(ar(dur, 0.3f, (0.01f, 0.05f, 0.02f)), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f))
-      .maxDelay(0.05f)
+      .delayBus.control(ar(dur, 0.3f, (0.1f, 0.15f, 0.04f)), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f))
+      .maxDelay(0.2f)
       .buildInstruments()
 
     val combFilter = new MonoCombReplaceInstrumentBuilder()
@@ -371,7 +371,7 @@ object Piece {
       .dur(dur)
       .decayTimeBus.control(line(dur, 0.6f, 0.9f), sine(dur, 0.6f, 0.5f, 0.05f, 0.06f))
       .delayBus.control(line(dur, 0.07f, 0.09f), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f))
-      .maxDelay(0.09f)
+      .maxDelay(0.1f)
       .buildInstruments()
 
     val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
@@ -380,7 +380,7 @@ object Piece {
       .dur(dur)
       .decayTimeBus.control(line(dur, 1.3f, 1.4f), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f))
       .delayBus.control(line(dur, 0.01f, 0.009f))
-      .maxDelay(0.09f)
+      .maxDelay(0.01f)
       .buildInstruments()
 
     val filterPulsePan = panInstrument
@@ -400,7 +400,7 @@ object Piece {
       .in(16)
       .out(soundBus)
       .dur(dur)
-      .ampBus.control(line(dur, 0.0005f, 0.0009f))
+      .ampBus.control(line(dur, 0.003f, 0.001f))
       .freqBus.control(line(dur, overSpectrum(22), overSpectrum(10)))
       .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
       .buildInstruments()
@@ -419,7 +419,7 @@ object Piece {
       .dur(dur)
       .decayTimeBus.control(line(dur, 1.2f, 1.3f), sine(dur, underSpectrum(40), underSpectrum(48), 0.05f, 0.06f))
       .delayBus.control(line(dur, 0.1f, 0.2f), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f))
-      .maxDelay(0.09f)
+      .maxDelay(0.3f)
       .buildInstruments()
 
     val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
@@ -427,8 +427,8 @@ object Piece {
       .in(soundBus)
       .dur(dur)
       .decayTimeBus.control(line(dur, 1.3f, 1.4f))
-      .delayBus.control(line(dur, 1.6f, 1.9f), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f))
-      .maxDelay(0.09f)
+      .delayBus.control(line(dur, 0.15f, 0.2f), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f))
+      .maxDelay(0.2f)
       .buildInstruments()
 
     val filterPulsePan = panInstrument
@@ -442,7 +442,53 @@ object Piece {
     pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
   }
 
+  def makePulseFilter3(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+    val pulseFilter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .in(16)
+      .out(soundBus)
+      .dur(dur)
+      .ampBus.control(line(dur, 0.006f, 0.003f))
+      .freqBus.control(line(dur, overSpectrum(47), overSpectrum(57)))
+      .bwBus.control(line(dur, 0.0000001f, 0.00000001f))
+      .buildInstruments()
 
+    val pulseFilterDelay = monoDelayReplaceInstrument
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .delayBus.control(ar(dur, 0.3f, (0.11f, 0.15f, 0.12f)), sine(dur, 0.1f, 0.2f, 0.01f, 0.01f))
+      .maxDelay(0.15f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.6f, 0.3f), sine(dur, 0.2f, 0.1f, 0.03f, 0.02f))
+      .delayBus.control(line(dur, 0.12f, 0.1f), sine(dur, 0.07f, 0.04f, 0.008f, 0.01f))
+      .maxDelay(0.15f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .addAction(TAIL_ACTION)
+      .in(soundBus)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.6f, 0.8f))
+      .delayBus.control(line(dur, 0.1f, 0.15f), sine(dur, 0.02f, 0.04f, 0.01f, 0.02f))
+      .maxDelay(0.15f)
+      .buildInstruments()
+
+    val filterPulsePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(soundBus)
+      .out(0)
+      .panBus.control(line(dur, -0.6f, -0.5f))
+      .buildInstruments()
+
+    pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
+  }
 
 
   /**
@@ -532,7 +578,8 @@ object Piece {
     val messages =
       makePulse(dur) ++
       makePulseFilter1(dur, 17) ++
-      makePulseFilter2(dur, 18)
+      makePulseFilter2(dur, 18) ++
+      makePulseFilter3(dur, 19)
     player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
 
 
@@ -553,7 +600,6 @@ object Piece {
     //makeSeqWithIndex(underSpectrum).foreach { case (i, v) => println(s"$i: $v")}
 
     firstMovement()
-    //firstMovement2()
   }
 
   /*
