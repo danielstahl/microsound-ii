@@ -299,6 +299,7 @@ object Instruments {
         .values(values._1, values._2, values._3)
         .types(arType._1, arType._2)
         .attackTime(attackTime)
+        .dur(dur)
     }
   }
 

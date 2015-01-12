@@ -319,6 +319,7 @@ object Piece {
 
   import LineControlInstrumentBuilder._
   import ARControlInstrumentBuilder._
+  import ASRControlInstrumentBuilder._
   import SineControlReplaceInstrumentBuilder._
 
   val overSpectrum = makeSpectrum(40, phi, 150)
@@ -491,6 +492,114 @@ object Piece {
   }
 
 
+  def makeNoise(dur: Float, audioBus: Int): Seq[Seq[Object]] = {
+      val whiteNoise = whiteNoiseInstrument
+        .addAction(TAIL_ACTION)
+        .dur(dur)
+        .out(audioBus)
+        .ampBus.control(asr(dur, (0.0f, 0.1f, 0.15f, 0.0f), (0.01f, 10f, 0.2f)))
+        .buildInstruments()
+
+    whiteNoise
+  }
+
+  def makeNoiseFilter1(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+    val rejectFilter = filterRejectInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.01f, 0.001f))
+      .freqBus.control(line(dur, overSpectrum(5), overSpectrum(6)))
+      .buildInstruments()
+
+    val filter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.000001f, 0.0000001f))
+      .freqBus.control(line(dur, overSpectrum(5), overSpectrum(6)))
+      .buildInstruments()
+
+    val noisePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioOutBus)
+      .out(0)
+      .panBus.control(line(dur, 0.6f, 0.5f))
+      .buildInstruments()
+
+    rejectFilter ++ filter ++ noisePan
+  }
+
+  def makeNoiseFilter2(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+    val rejectFilter = filterRejectInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.5f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.01f, 0.001f))
+      .freqBus.control(line(dur, overSpectrum(22), overSpectrum(10)))
+      .buildInstruments()
+
+    val filter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.5f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.000001f, 0.0000001f))
+      .freqBus.control(line(dur, overSpectrum(22), overSpectrum(10)))
+      .buildInstruments()
+
+    val noisePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioOutBus)
+      .out(0)
+      .panBus.control(line(dur, 0.7f, 0.8f))
+      .buildInstruments()
+
+    rejectFilter ++ filter ++ noisePan
+  }
+
+
+  def makeNoiseFilter3(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+    val rejectFilter = filterRejectInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.001f, 0.0001f))
+      .freqBus.control(line(dur, overSpectrum(47), overSpectrum(57)))
+      .buildInstruments()
+
+    val filter = filterInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioInBus)
+      .out(audioOutBus)
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.07f, 0.0f)))
+      .bwBus.control(line(dur, 0.000001f, 0.0000001f))
+      .freqBus.control(line(dur, overSpectrum(47), overSpectrum(57)))
+      .buildInstruments()
+
+    val noisePan = panInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(audioOutBus)
+      .out(0)
+      .panBus.control(line(dur, 0.9f, 0.3f))
+      .buildInstruments()
+
+    rejectFilter ++ filter ++ noisePan
+  }
+
   /**
    * The first movement.
    * The idea is to have two main layers
@@ -507,71 +616,6 @@ object Piece {
 
     val dur = overSpectrum(1)
 
-
-    /*
-    val pinkNoise = pinkNoiseInstrument
-      .addAction(TAIL_ACTION)
-      .out(18f)
-      .dur(overSpectrum(1))
-      .amp(0.5f)
-      .build()
-
-    val pinkNoiseVolume = monoVolumeLineReplaceInstrument
-      .addAction(TAIL_ACTION)
-      .in(18f)
-      .dur(overSpectrum(1))
-      .amp(0.5f, 0.0f)
-      .build()
-
-    val pinkNoisePan = panInstrument
-      .addAction(TAIL_ACTION)
-      .dur(overSpectrum(1))
-      .in(18f)
-      .out(0)
-      .pan(-0.8f, -0.6f)
-      .build()
-
-    val whiteNoise = whiteNoiseInstrument
-      .addAction(TAIL_ACTION)
-      .out(19f)
-      .dur(overSpectrum(1))
-      .amp(0.5f)
-      .build()
-
-    val whiteNoiseVolume = monoVolumeLineReplaceInstrument
-      .addAction(TAIL_ACTION)
-      .in(19f)
-      .dur(overSpectrum(1))
-      .amp(0.0f, 0.5f)
-      .build()
-
-    val whiteNoisePan = panInstrument
-      .addAction(TAIL_ACTION)
-      .dur(overSpectrum(1))
-      .in(19f)
-      .out(0)
-      .pan(-0.2f, -0.4f)
-      .build()
-
-    val whiteNoiseFilter = filterRejectInstrument
-      .addAction(TAIL_ACTION)
-      .in(19f)
-      .out(20f)
-      .dur(overSpectrum(1))
-      .amp(0.5f)
-      .freq(overSpectrum(1), overSpectrum(0))
-      .width(1.8f, 0.9f)
-      .build()
-
-    val whiteNoiseFilterPan = panInstrument
-      .addAction(TAIL_ACTION)
-      .dur(overSpectrum(1))
-      .in(12f)
-      .out(0)
-      .pan(-1f, -0.8f)
-      .build()
-     */
-
     setupNodes(player)
 
 
@@ -579,7 +623,11 @@ object Piece {
       makePulse(dur) ++
       makePulseFilter1(dur, 17) ++
       makePulseFilter2(dur, 18) ++
-      makePulseFilter3(dur, 19)
+      makePulseFilter3(dur, 19) ++
+      makeNoise(dur, 20) ++
+      makeNoiseFilter1(dur, 20, 21) ++
+      makeNoiseFilter2(dur, 20, 22) ++
+      makeNoiseFilter3(dur, 20, 23)
     player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
 
 
@@ -601,124 +649,4 @@ object Piece {
 
     firstMovement()
   }
-
-  /*
- def scratch(): Unit = {
-   val player: MusicPlayer = MusicPlayer()
-
-   println(s"fact is $phi")
-
-   println(s"overSpectrum")
-   makeSeqWithIndex(overSpectrum).foreach { case (i, v) => println(s"$i: $v")}
-   println(s"underSpectrum")
-   makeSeqWithIndex(underSpectrum).foreach { case (i, v) => println(s"$i: $v")}
-
-   player.startPlay()
-
-   val pulse = pulseInstrument
-     .addAction(TAIL_ACTION)
-     .out(16f)
-     .dur(10f)
-     .amp(0.1f)
-     //.freq(0.8f, 0.4f)
-     .freq(underSpectrum(1), underSpectrum(10))
-     //.width(0.2f, 0.6f)
-     .width(underSpectrum(99), underSpectrum(48))
-     .build()
-
-   val pulseASR = pulseASRInstrument
-     .addAction(TAIL_ACTION)
-     .out(16f)
-     .dur(10f)
-     .amp(0.1f)
-     .freqASRBuilder.times(1f, 10f, 2f)
-     .freqASRBuilder.values(underSpectrum(2), underSpectrum(10), underSpectrum(4), underSpectrum(2))
-     .widthASRBuilder.times(1f, 10f, 2f)
-     .widthASRBuilder.values(underSpectrum(65), underSpectrum(48), underSpectrum(24), underSpectrum(13))
-     .build()
-
-   val filterASR1 = filterASRInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freqASRBuilder.times(1f, 10f, 2f)
-     .freqASRBuilder.values(overSpectrum(43), overSpectrum(44), overSpectrum(20), overSpectrum(19))
-     .bwASRBuilder.times(1f, 10f, 2f)
-     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-     .build()
-
-   val filter1 = filterInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     //.freq(2000f, 4000f)
-     .freq(overSpectrum(44), overSpectrum(20))
-     .width(0.000001f, 0.000001f)
-     .build()
-
-   val filter2 = filterInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freq(overSpectrum(45), overSpectrum(25))
-     .width(0.000001f, 0.000001f)
-     .build()
-
-   val filterASR2 = filterASRInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freqASRBuilder.times(1f, 10f, 2f)
-     .freqASRBuilder.values(overSpectrum(46), overSpectrum(45), overSpectrum(25), overSpectrum(26))
-     .bwASRBuilder.times(1f, 10f, 2f)
-     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-     .build()
-
-   val filter3 = filterInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freq(overSpectrum(46), overSpectrum(52))
-     .width(0.000001f, 0.000001f)
-     .build()
-
-   val filterASR3 = filterASRInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freqASRBuilder.times(1f, 10f, 2f)
-     .freqASRBuilder.values(overSpectrum(47), overSpectrum(46), overSpectrum(52), overSpectrum(53))
-     .bwASRBuilder.times(1f, 10f, 2f)
-     .bwASRBuilder.values(0.000001f, 0.000001f, 0.000001f, 0.000001f)
-     .build()
-
-   val filter4 = filterInstrument
-     .addAction(TAIL_ACTION)
-     .in(16f)
-     .out(0f)
-     .dur(10f)
-     .amp(0.1f)
-     .freq(overSpectrum(47), overSpectrum(60))
-     .width(0.000001f, 0.000001f)
-     .build()
-
-
-
-   setupNodes(player)
-   //player.sendNew(absoluteTimeToMillis(0f), pulse, filter1, filter2, filter3, filter4)
-   player.sendNew(absoluteTimeToMillis(0f), pulseASR, filterASR1, filter2, filterASR3, filter4)
-   Thread.sleep(1000)
- } */
 }
