@@ -326,7 +326,7 @@ object Piece {
   val underSpectrum = makeInvertedSpectrum(40, phi, 150)
 
 
-  def makePulse(dur: Float): Seq[Seq[Object]] = {
+  def makePulse(dur: Float, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val pulse = pulseInstrument
     .addAction(TAIL_ACTION)
     .out(16)
@@ -341,13 +341,13 @@ object Piece {
       .dur(dur)
       .in(16)
       .out(0)
-      .panBus.control(line(dur, 0.6f, 0.3f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     pulse ++ pulsePan
   }
 
-  def makePulseFilter1(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+  def makePulseFilter1(dur: Float, soundBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val pulseFilter = filterInstrument
       .addAction(TAIL_ACTION)
       .in(16)
@@ -389,13 +389,13 @@ object Piece {
       .dur(dur)
       .in(soundBus)
       .out(0)
-      .panBus.control(line(dur, -0.8f, -1f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
   }
 
-  def makePulseFilter2(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+  def makePulseFilter2(dur: Float, soundBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val pulseFilter = filterInstrument
       .addAction(TAIL_ACTION)
       .in(16)
@@ -437,13 +437,13 @@ object Piece {
       .dur(dur)
       .in(soundBus)
       .out(0)
-      .panBus.control(line(dur, -0.7f, -0.8f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
   }
 
-  def makePulseFilter3(dur: Float, soundBus: Int): Seq[Seq[Object]] = {
+  def makePulseFilter3(dur: Float, soundBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val pulseFilter = filterInstrument
       .addAction(TAIL_ACTION)
       .in(16)
@@ -485,7 +485,7 @@ object Piece {
       .dur(dur)
       .in(soundBus)
       .out(0)
-      .panBus.control(line(dur, -0.6f, -0.5f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     pulseFilter ++ pulseFilterDelay ++ combFilter ++ allpassFilter ++ filterPulsePan
@@ -503,7 +503,7 @@ object Piece {
     whiteNoise
   }
 
-  def makeNoiseFilter1(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+  def makeNoiseFilter1(dur: Float, audioInBus: Int, audioOutBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val rejectFilter = filterRejectInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -529,13 +529,13 @@ object Piece {
       .dur(dur)
       .in(audioOutBus)
       .out(0)
-      .panBus.control(line(dur, 0.6f, 0.5f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     rejectFilter ++ filter ++ noisePan
   }
 
-  def makeNoiseFilter2(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+  def makeNoiseFilter2(dur: Float, audioInBus: Int, audioOutBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val rejectFilter = filterRejectInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -561,14 +561,14 @@ object Piece {
       .dur(dur)
       .in(audioOutBus)
       .out(0)
-      .panBus.control(line(dur, 0.7f, 0.8f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     rejectFilter ++ filter ++ noisePan
   }
 
 
-  def makeNoiseFilter3(dur: Float, audioInBus: Int, audioOutBus: Int): Seq[Seq[Object]] = {
+  def makeNoiseFilter3(dur: Float, audioInBus: Int, audioOutBus: Int, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val rejectFilter = filterRejectInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -594,7 +594,7 @@ object Piece {
       .dur(dur)
       .in(audioOutBus)
       .out(0)
-      .panBus.control(line(dur, 0.9f, 0.3f))
+      .panBus.control(line(dur, startPan, endPan))
       .buildInstruments()
 
     rejectFilter ++ filter ++ noisePan
@@ -618,16 +618,23 @@ object Piece {
 
     setupNodes(player)
 
+    /*
+    p = pulse pf = pulsefilter n = noise
+ pf1  pf2 pf3 n1  n2  n3  p
 
+ pf1  n3    pf2     n2  p       n1      pf3
+ n2   p     pf3     n1  pf2     pf1     n3
+ -1   -.66  -.33    0   0.33    0.66    1
+    * */
     val messages =
-      makePulse(dur) ++
-      makePulseFilter1(dur, 17) ++
-      makePulseFilter2(dur, 18) ++
-      makePulseFilter3(dur, 19) ++
+      makePulse(dur, 0.33f, -0.66f) ++
+      makePulseFilter1(dur, 17, -1f, 0.66f) ++
+      makePulseFilter2(dur, 18, -0.33f, 0.33f) ++
+      makePulseFilter3(dur, 19, 1f, -0.33f) ++
       makeNoise(dur, 20) ++
-      makeNoiseFilter1(dur, 20, 21) ++
-      makeNoiseFilter2(dur, 20, 22) ++
-      makeNoiseFilter3(dur, 20, 23)
+      makeNoiseFilter1(dur, 20, 21, 0.66f, 0f) ++
+      makeNoiseFilter2(dur, 20, 22, 0f, -1f) ++
+      makeNoiseFilter3(dur, 20, 23, -0.66f, 1f)
     player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
 
 
