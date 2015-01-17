@@ -27,3 +27,8 @@ s.options.firstPrivateBus;
 SynthDescLib.global.read;
 SynthDescLib.global.browse;
 )
+
+// Record
+s.prepareForRecord;
+s.record;
+s.stopRecording;
