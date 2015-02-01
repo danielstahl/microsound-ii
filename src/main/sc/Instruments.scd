@@ -493,3 +493,13 @@ theLine + theSine;
 }.plot(10);
 )
 
+{ Resonz.ar(WhiteNoise.ar(1), 520, 0.001, 3) }.play
+
+{ BPF.ar(WhiteNoise.ar(1), 520, 0.001, 5) }.play
+
+{
+	r = WhiteNoise.ar(1);
+	BPF.ar(r, 520, 0.001, 5);
+}.play
+
+
