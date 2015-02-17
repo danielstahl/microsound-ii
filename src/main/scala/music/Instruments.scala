@@ -18,7 +18,7 @@ object Instruments {
   object HEAD_ACTION extends AddAction(new Integer(0))
   object TAIL_ACTION extends AddAction(new Integer(1))
   object BEFORE_ACTION extends AddAction(new Integer(2))
-  object AFTER_ACTION extends AddAction(new Integer(2))
+  object AFTER_ACTION extends AddAction(new Integer(3))
 
   sealed case class Node(nodeId: Integer)
   object SOURCE extends Node(1001)
@@ -199,11 +199,12 @@ object Instruments {
   }
 
   object SineControlReplaceInstrumentBuilder {
-    def sine(dur: Float, startFreq: Float, endFreq: Float, startAmp: Float, endAmp: Float): SineControlReplaceInstrumentBuilder = {
+    def sine(dur: Float, startFreq: Float, endFreq: Float, startAmp: Float, endAmp: Float, nodeId: Node = SOURCE): SineControlReplaceInstrumentBuilder = {
       new SineControlReplaceInstrumentBuilder()
         .dur(dur)
         .freq(startFreq, endFreq)
         .amp(startAmp, endAmp)
+        .nodeId(nodeId)
     }
   }
 
@@ -233,10 +234,11 @@ object Instruments {
   }
 
   object LineControlInstrumentBuilder {
-    def line(dur: Float, start: Float, end: Float): LineControlInstrumentBuilder = {
+    def line(dur: Float, start: Float, end: Float, nodeId: Node = SOURCE): LineControlInstrumentBuilder = {
       new LineControlInstrumentBuilder()
         .control(start, end)
         .dur(dur)
+        .nodeId(nodeId)
     }
   }
 
@@ -285,8 +287,9 @@ object Instruments {
   }
 
   object ASRControlInstrumentBuilder {
-    def asr(dur: Float, values: (Float, Float, Float, Float), times: (Float, Float, Float)): ASRControlInstrumentBuilder = {
+    def asr(dur: Float, values: (Float, Float, Float, Float), times: (Float, Float, Float), nodeId: Node = SOURCE): ASRControlInstrumentBuilder = {
       new ASRControlInstrumentBuilder()
+        .nodeId(nodeId)
         .values(values._1, values._2, values._3, values._4)
         .times(times._1, times._2, times._3)
         .dur(dur)
@@ -294,8 +297,9 @@ object Instruments {
   }
 
   object ARControlInstrumentBuilder {
-    def ar(dur: Float, attackTime: Float, values: (Float, Float, Float), arType: (EnvCurve, EnvCurve) = (LINEAR, LINEAR)): ARControlInstrumentBuilder = {
+    def ar(dur: Float, attackTime: Float, values: (Float, Float, Float), arType: (EnvCurve, EnvCurve) = (LINEAR, LINEAR), nodeId: Node = SOURCE): ARControlInstrumentBuilder = {
       new ARControlInstrumentBuilder()
+        .nodeId(nodeId)
         .values(values._1, values._2, values._3)
         .types(arType._1, arType._2)
         .attackTime(attackTime)
@@ -655,4 +659,5 @@ object Instruments {
   def panInstrument = new PanInstrumentBuilder
   def monoDelayInstrument = new MonoDelayInstrumentBuilder
   def monoDelayReplaceInstrument = new MonoDelayReplaceInstrumentBuilder
+  def monoVolumeInstrument = new MonoVolumeBuilder
 }

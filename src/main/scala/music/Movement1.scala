@@ -3,6 +3,7 @@ package music
 import music.Instruments.ARControlInstrumentBuilder._
 import music.Instruments.ASRControlInstrumentBuilder._
 import music.Instruments.LineControlInstrumentBuilder._
+import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
 import music.Piece._
 
@@ -85,6 +86,15 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -1))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+
     val filter2 = filterInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -103,7 +113,15 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ filter2 ++ pan2).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus3)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
   }
 
   def note2(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -148,6 +166,14 @@ object Movement1 {
       .panBus.control(line(dur, 0.5f, 0.8f))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus1)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     val pulse2Pan = panInstrument
       .addAction(TAIL_ACTION)
       .dur(dur2)
@@ -156,7 +182,15 @@ object Movement1 {
       .panBus.control(line(dur2, 0.6f, 0f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ pulse2Pan).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
   }
 
   def note3(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -196,7 +230,15 @@ object Movement1 {
       .panBus.control(line(dur, 0.5f, -0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
   }
 
   def note4(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -228,7 +270,15 @@ object Movement1 {
       .panBus.control(line(dur, -0.5f, 0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
   }
 
 
@@ -268,9 +318,16 @@ object Movement1 {
       .panBus.control(line(dur, 0f, 0.9f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan).toSeq:_*)
-  }
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
 
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
+  }
 
   def note6(note: Note)(implicit player: MusicPlayer): Unit = {
     val dur = 0.1f
@@ -313,6 +370,14 @@ object Movement1 {
       .panBus.control(line(dur, -0.5f, -0.8f))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus1)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     val pulse2Pan = panInstrument
       .addAction(TAIL_ACTION)
       .dur(dur2)
@@ -321,7 +386,15 @@ object Movement1 {
       .panBus.control(line(dur2, -0.6f, 0f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ pulse2Pan).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
   }
 
   def note7(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -355,6 +428,14 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -1))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     val filter2 = filterInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -373,7 +454,15 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ filter2 ++ pan2).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus3)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
   }
 
   def note8(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -406,7 +495,15 @@ object Movement1 {
       .panBus.control(line(dur, -0.5f, 0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
 
   }
 
@@ -447,7 +544,15 @@ object Movement1 {
       .panBus.control(line(dur, 1f, 0f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
   }
 
   def note10(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -490,7 +595,15 @@ object Movement1 {
       .panBus.control(line(dur, -0.5f, -0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ filter2 ++ pulsePan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ filter2 ++ pulsePan ++ effect).toSeq:_*)
   }
 
   def note11(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -522,7 +635,15 @@ object Movement1 {
       .panBus.control(line(dur, -0.5f, -1f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
   }
 
   def note12(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -561,7 +682,15 @@ object Movement1 {
       .panBus.control(line(dur, 0.5f, 1f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan).toSeq:_*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
   }
 
   def note13(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -606,6 +735,14 @@ object Movement1 {
       .panBus.control(line(dur, 0.5f, 0.8f))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus1)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     val pulse2Pan = panInstrument
       .addAction(TAIL_ACTION)
       .dur(dur2)
@@ -614,7 +751,15 @@ object Movement1 {
       .panBus.control(line(dur2, 0.6f, 0f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ pulse2Pan).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
   }
 
   def note14(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -648,6 +793,14 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -1))
       .buildInstruments()
 
+    val effect1 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus2)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     val filter2 = filterInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -666,7 +819,122 @@ object Movement1 {
       .panBus.control(line(dur, 0f, -0.5f))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ filter2 ++ pan2).toSeq:_*)
+    val effect2 = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus3)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
+  }
+
+  def effect1(implicit player: MusicPlayer): Unit = {
+    val bus = 22
+    val dur = 50
+
+    val volume = monoVolumeInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(23)
+      .ampBus.control(line(dur, 0.1f, 0.1f))
+      .buildInstruments()
+
+    val delay = monoDelayReplaceInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .delayBus.control(ar(dur, 0.3f, (0.3f, 0.55f, 0.2f), nodeId = EFFECT), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f, nodeId = EFFECT))
+      .maxDelay(0.5f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.6f, 0.9f, nodeId = EFFECT), sine(dur, 0.6f, 0.5f, 0.05f, 0.06f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.07f, 0.09f, nodeId = EFFECT), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f, nodeId = EFFECT))
+      .maxDelay(0.1f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.3f, 1.4f, nodeId = EFFECT), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.01f, 0.009f, nodeId = EFFECT))
+      .maxDelay(0.01f)
+      .buildInstruments()
+
+    val pan = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .out(0)
+      .panBus.control(line(dur, 1f, -1f, EFFECT))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
+  }
+
+  def effect2(implicit player: MusicPlayer): Unit = {
+    val bus = 24
+    val dur = 50
+
+    val volume = monoVolumeInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(25)
+      .ampBus.control(line(dur, 0.05f, 0.05f))
+      .buildInstruments()
+
+    val delay = monoDelayReplaceInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(25)
+      .delayBus.control(ar(dur, 0.3f, (0.01f, 0.1f, 0.02f), nodeId = EFFECT), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f, nodeId = EFFECT))
+      .maxDelay(0.2f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(25)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.2f, 1.3f, nodeId = EFFECT), sine(dur, underSpectrum(40), underSpectrum(48), 0.05f, 0.06f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.1f, 0.2f, nodeId = EFFECT), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f, nodeId = EFFECT))
+      .maxDelay(0.3f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(25)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.3f, 1.4f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.15f, 0.2f, nodeId = EFFECT), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f, nodeId = EFFECT))
+      .maxDelay(0.2f)
+      .buildInstruments()
+
+    val pan = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(25)
+      .out(0)
+      .panBus.control(line(dur, -1f, 1f, EFFECT))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
   }
 
   def absolute(start: Float, relative: Seq[Float]): Seq[Float] = {
@@ -679,7 +947,7 @@ object Movement1 {
     }
   }
 
-  case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int)
+  case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int, effectBus: Int)
 
   def firstMovement(): Unit = {
     BusGenerator.reset()
@@ -700,11 +968,16 @@ object Movement1 {
 
     val channels = Seq(16, 19, 16, 19, 16, 19, 16, 19, 16, 19, 16, 19, 16, 19)
 
+    val effectBus = Seq(22, 24, 24, 22, 22, 24, 22, 24, 24, 24, 22, 22, 24, 24)
+
     val notes: Seq[Note => Unit] = Seq(note1, note2, note3, note4, note5, note6, note7, note8, note9, note10, note11, note12, note13, note14)
+
+    effect1
+    effect2
 
     (0 until notes.length).foreach {
       i =>
-        notes(i)(Note(concreteMelody(i), concreteRetrogradeMelody(i), absoluteTime(i), concreteRhythm(i), channels(i)))
+        notes(i)(Note(concreteMelody(i), concreteRetrogradeMelody(i), absoluteTime(i), concreteRhythm(i), channels(i), effectBus(i)))
     }
 
     Thread.sleep(1000)

@@ -324,4 +324,8 @@ object Movement2 {
 
     Thread.sleep(1000)
   }
+
+  def main(args: Array[String]): Unit = {
+    secondMovement()
+  }
 }

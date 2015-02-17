@@ -12,12 +12,15 @@ Server.internal.options.numBuffers = 2056;
 
 s.boot;
 s.shutdown;
+s.plotTree;
+s.queryAllNodes;
 
 //Turn on dumpOSC
 s.dumpOSC(1);
 
 //Turn of dumpOSC
 s.dumpOSC(0);
+
 
 // Find the first private bus
 s.options.firstPrivateBus;

@@ -53,7 +53,7 @@ case class MusicPlayer() {
     makeOSCMessage("/g_new", Seq(nodeId, new Integer(0), groupId))
 
   def makeGroupTail(groupId: Integer, nodeId: Integer) =
-    makeOSCMessage("/g_new", Seq(nodeId, new Integer(1), groupId))
+    makeOSCMessage("/g_new", Seq(nodeId, /*new Integer(1)*/ new Integer(3), groupId))
 
   def makeAddHeadNode(groupId: Integer, nodeId: Integer) =
     makeOSCMessage("/g_head", Seq(groupId, nodeId))

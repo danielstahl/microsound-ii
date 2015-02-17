@@ -161,6 +161,7 @@ SynthDef(\limitReplace, {
 SynthDef(\pan, {
 	arg dur = 1, panBus = 0, in = 0, out = 0;
 	var pan, input;
+	Line.kr(dur:dur, doneAction:2);
 	pan = In.kr(panBus);
 	input = In.ar(in, 1);
 	Out.ar(out, LinPan2.ar(input, pan));
