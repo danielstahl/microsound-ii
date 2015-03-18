@@ -14,6 +14,7 @@ s.boot;
 s.shutdown;
 s.plotTree;
 s.queryAllNodes;
+s.meter;
 
 //Turn on dumpOSC
 s.dumpOSC(1);

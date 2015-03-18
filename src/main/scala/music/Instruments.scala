@@ -1,7 +1,9 @@
 package music
 
 import java.{lang => jl}
-import Utils._
+import net.soundmining.MusicPlayer
+import net.soundmining.Utils._
+
 /**
  * Instruments
  */
@@ -21,11 +23,11 @@ object Instruments {
   object AFTER_ACTION extends AddAction(new Integer(3))
 
   sealed case class Node(nodeId: Integer)
-  object SOURCE extends Node(1001)
-  object EFFECT extends Node(1002)
+  object SOURCE extends Node(1004)
+  object EFFECT extends Node(1005)
 
   def setupNodes(player: MusicPlayer) = {
-    val osc = Seq(player.makeGroupHead(1, SOURCE.nodeId), player.makeGroupTail(SOURCE.nodeId, EFFECT.nodeId))
+    val osc = Seq(player.makeGroupHead(0, SOURCE.nodeId), player.makeGroupTail(SOURCE.nodeId, EFFECT.nodeId))
     player.sendBundle(absoluteTimeToMillis(0f), osc)
   }
 
@@ -158,11 +160,11 @@ object Instruments {
     )
   }
 
-  trait ControlInstrumentBuilder extends OutputBuilder with InstrumentBuilder
+  trait ControlInstrumentBuilder extends OutputBuilder with InstrumentBuilder with DurBuilder
 
-  trait ControlReplaceInstrumentBuilder extends InputBuilder with InstrumentBuilder
+  trait ControlReplaceInstrumentBuilder extends InputBuilder with InstrumentBuilder with DurBuilder
 
-  class SineControlReplaceInstrumentBuilder extends AbstractInstrumentBuilder with ControlReplaceInstrumentBuilder with DurBuilder {
+  class SineControlReplaceInstrumentBuilder extends AbstractInstrumentBuilder with ControlReplaceInstrumentBuilder {
     type SelfType = SineControlReplaceInstrumentBuilder
     def self(): SelfType = this
 
@@ -208,7 +210,7 @@ object Instruments {
     }
   }
 
-  class LineControlInstrumentBuilder extends AbstractInstrumentBuilder with ControlInstrumentBuilder with DurBuilder {
+  class LineControlInstrumentBuilder extends AbstractInstrumentBuilder with ControlInstrumentBuilder {
     type SelfType = LineControlInstrumentBuilder
     def self(): SelfType = this
 
@@ -242,7 +244,7 @@ object Instruments {
     }
   }
 
-  class ASRControlInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with ControlInstrumentBuilder {
+  class ASRControlInstrumentBuilder extends AbstractInstrumentBuilder with ControlInstrumentBuilder {
     type SelfType = ASRControlInstrumentBuilder
     def self(): SelfType = this
 
@@ -307,7 +309,7 @@ object Instruments {
     }
   }
 
-  class ARControlInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with ControlInstrumentBuilder {
+  class ARControlInstrumentBuilder extends AbstractInstrumentBuilder with ControlInstrumentBuilder {
     type SelfType = ARControlInstrumentBuilder
     def self(): SelfType = this
 
@@ -429,6 +431,68 @@ object Instruments {
         ampBus.buildBus() ++
         freqBus.buildBus() ++
         bwBus.buildBus()
+  }
+
+  class HighpassInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder with OutputBuilder {
+    type SelfType = HighpassInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "highPass"
+
+    val freqBus = ControlArgumentBuilder[HighpassInstrumentBuilder](this, "freqBus")
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildOut() ++
+        buildDur() ++
+        freqBus.buildBus()
+  }
+
+  class HighpassReplaceInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder {
+    type SelfType = HighpassReplaceInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "highPassReplace"
+
+    val freqBus = ControlArgumentBuilder[HighpassReplaceInstrumentBuilder](this, "freqBus")
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildDur() ++
+        freqBus.buildBus()
+  }
+
+  class LowpassInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder with OutputBuilder {
+    type SelfType = LowpassInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "lowPass"
+
+    val freqBus = ControlArgumentBuilder[LowpassInstrumentBuilder](this, "freqBus")
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildOut() ++
+        buildDur() ++
+        freqBus.buildBus()
+  }
+
+  class LowpassReplaceInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder {
+    type SelfType = LowpassReplaceInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "lowPassReplace"
+
+    val freqBus = ControlArgumentBuilder[LowpassReplaceInstrumentBuilder](this, "freqBus")
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildDur() ++
+        freqBus.buildBus()
   }
 
   abstract class CommonNoiseInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with OutputBuilder {
@@ -605,9 +669,6 @@ object Instruments {
     val instrumentName: String = "monoCombReplace"
   }
 
-
-
-
   abstract class CommonMonoAllpassInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder {
     val delayBus = ControlArgumentBuilder[SelfType](self(), "delayBus")
 
@@ -647,17 +708,21 @@ object Instruments {
     val instrumentName: String = "monoAllpassReplace"
   }
 
-
   def lineControlInstrument = new LineControlInstrumentBuilder
   def pulseInstrument = new PulseInstrumentBuilder
   def filterInstrument = new FilterInstrumentBuilder
   def filterRejectInstrument = new FilterRejectInstrumentBuilder
   def filterReplaceInstrument = new FilterReplaceInstrumentBuilder
   def filterRejectReplaceInstrument = new FilterRejectReplaceInstrumentBuilder
+  def highPassInstrument = new HighpassInstrumentBuilder
+  def highPassReplaceInstrument = new HighpassReplaceInstrumentBuilder
+  def lowPassInstrument = new LowpassInstrumentBuilder
+  def lowPassReplaceInstrument = new LowpassReplaceInstrumentBuilder
   def whiteNoiseInstrument = new WhiteNoiseInstrumentBuilder
   def pinkNoiseInstrument = new PinkNoiseInstrumentBuilder
   def panInstrument = new PanInstrumentBuilder
   def monoDelayInstrument = new MonoDelayInstrumentBuilder
   def monoDelayReplaceInstrument = new MonoDelayReplaceInstrumentBuilder
   def monoVolumeInstrument = new MonoVolumeBuilder
+  def monoReplaceVolumeInstrument = new MonoVolumeReplaceBuilder
 }

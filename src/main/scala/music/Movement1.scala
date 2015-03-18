@@ -6,6 +6,9 @@ import music.Instruments.LineControlInstrumentBuilder._
 import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
 import music.Piece._
+import net.soundmining.Melody._
+import net.soundmining.MusicPlayer
+import net.soundmining.Utils._
 
 /**
  * The idea is to write a short piece that is built
@@ -22,9 +25,6 @@ import music.Piece._
  * Timbre
  */
 object Movement1 {
-
-  import Utils._
-  import Melody._
 
   def playNote(start: Float, dur: Float, freq: Float)(implicit player: MusicPlayer): Unit = {
     val pulse = pulseInstrument
@@ -937,15 +937,6 @@ object Movement1 {
     player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
   }
 
-  def absolute(start: Float, relative: Seq[Float]): Seq[Float] = {
-    var tmp = start
-    relative.map {
-      time =>
-        val result = tmp
-        tmp = tmp + time
-        result
-    }
-  }
 
   case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int, effectBus: Int)
 
@@ -957,8 +948,6 @@ object Movement1 {
 
     setupNodes(player)
 
-    val melody =
-      Seq(3, 2, 20, 21, 7, 14, 24, 15, 8, 9, 6, 11, 23, 18)
 
     val retrogradeMelody = retrograde(inverse(transpose(70, melody)))
     val concreteMelody = concrete(melody, overSpectrum)

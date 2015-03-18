@@ -143,6 +143,45 @@ SynthDef(\filtRejectReplace, {
 	ReplaceOut.ar(in, filt * amp);
 }).add;
 
+SynthDef(\highPass, {
+	arg dur = 1, freqBus = 1, in = 0, out = 0;
+	var filt, freq, input;
+	Line.kr(dur:dur, doneAction:2);
+	freq = In.kr(freqBus);
+	input = In.ar(in, 1);
+	filt = HPF.ar(input, freq);
+	Out.ar(out, filt);
+}).add;
+
+SynthDef(\highPassReplace, {
+	arg dur = 1, freqBus = 1, in = 0;
+	var filt, freq, input;
+	Line.kr(dur:dur, doneAction:2);
+	freq = In.kr(freqBus);
+	input = In.ar(in, 1);
+	filt = HPF.ar(input, freq);
+	ReplaceOut.ar(in, filt);
+}).add;
+
+SynthDef(\lowPass, {
+	arg dur = 1, freqBus = 1, in = 0, out = 0;
+	var filt, freq, input;
+	Line.kr(dur:dur, doneAction:2);
+	freq = In.kr(freqBus);
+	input = In.ar(in, 1);
+	filt = LPF.ar(input, freq);
+	Out.ar(out, filt);
+}).add;
+
+SynthDef(\lowPassReplace, {
+	arg dur = 1, freqBus = 1, in = 0;
+	var filt, freq, input;
+	Line.kr(dur:dur, doneAction:2);
+	freq = In.kr(freqBus);
+	input = In.ar(in, 1);
+	filt = LPF.ar(input, freq);
+	ReplaceOut.ar(in, filt);
+}).add;
 
 SynthDef(\limit, {
 	arg level = 1, dur = 0.01, in = 0, out = 0;
@@ -483,24 +522,3 @@ Synth("lineControl", [dur: 30, startValue: 0.7, endValue: 0.8, out: 17], addActi
 Synth("pan", [dur: 30, panBus: 17, in: 18, out: 0], addAction:\addToTail);
 
 )
-
-(
-{
-var theLine, theSine;
-theLine = Line.kr(0.01, 0.02, 10, doneAction:2);
-theSine = SinOsc.kr(0.5, 0, 0.001);
-
-theLine + theSine;
-}.plot(10);
-)
-
-{ Resonz.ar(WhiteNoise.ar(1), 520, 0.001, 3) }.play
-
-{ BPF.ar(WhiteNoise.ar(1), 520, 0.001, 5) }.play
-
-{
-	r = WhiteNoise.ar(1);
-	BPF.ar(r, 520, 0.001, 5);
-}.play
-
-

@@ -1,7 +1,8 @@
 package music
 
 import music.Instruments._
-import music.Utils._
+import net.soundmining.MusicPlayer
+import net.soundmining.Utils._
 
 /**
  * The second movement
@@ -11,7 +12,7 @@ object Movement2 {
   import music.Instruments.ASRControlInstrumentBuilder._
   import music.Instruments.LineControlInstrumentBuilder._
   import music.Instruments.SineControlReplaceInstrumentBuilder._
-  import Piece._
+  import music.Piece._
 
   def makePulse(dur: Float, startPan: Float, endPan: Float): Seq[Seq[Object]] = {
     val pulse = pulseInstrument
