@@ -68,7 +68,7 @@ object Instruments {
     var instruments: Seq[InstrumentBuilder] = Seq(this)
 
     def addChild(instrument: InstrumentBuilder) = instruments = instruments :+ instrument
-    def buildInstruments(): Seq[Seq[Object]] = instruments.reverse.map(_.build())
+    def buildInstruments(): Seq[Seq[Object]] = instruments.reverseMap(_.build())
 
     def build(): Seq[Object]
   }
@@ -224,6 +224,9 @@ object Instruments {
       endValue = buildFloat(end)
       self()
     }
+
+    def reverse: LineControlInstrumentBuilder =
+      LineControlInstrumentBuilder.line(dur.floatValue(), endValue.floatValue(), startValue.floatValue())
 
     override def build(): Seq[Object] =
       super.build() ++

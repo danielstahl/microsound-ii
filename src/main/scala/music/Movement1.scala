@@ -41,14 +41,14 @@ object Movement1 {
   }
 
   def playMelody(melody: Seq[Float])(implicit player: MusicPlayer): Unit = {
-    (0 until melody.length).map {
+    (0 until melody.length).foreach {
       i => playNote(i, 0.5f, melody(i))
     }
   }
 
   def playMelody(melody: Seq[Float], durMelody: Seq[Float])(implicit player: MusicPlayer): Unit = {
     var tmpTime = 0f
-    (0 until melody.length).map {
+    (0 until melody.length).foreach {
       i =>
         playNote(tmpTime, 0.5f, melody(i))
         tmpTime = tmpTime + durMelody(i)
@@ -73,8 +73,9 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus2)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.01f, 0.0f)))
-      .bwBus.control(line(dur, 0.000000000000000001f, 0.000000000000000001f))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 1.0f, 0.0f)))
+      //.bwBus.control(line(dur, 0.000000000000000001f, 0.000000000000000001f))
+      .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
 
@@ -94,14 +95,14 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-
     val filter2 = filterInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus1)
       .out(bus3)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.01f, 0.0f)))
-      .bwBus.control(line(dur, 0.000000000001f, 0.000000000001f))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 1.0f, 0.0f)))
+      //.bwBus.control(line(dur, 0.000000000001f, 0.000000000001f))
+      .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
 
@@ -137,7 +138,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.05f, 0.02f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.5f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -155,7 +156,7 @@ object Movement1 {
       .dur(dur2)
       .freqBus.control(line(dur2, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur2, 0.1f, 0.9f))
-      .ampBus.control(asr(dur2, (0.0f, 0.02f, 0.01f, 0.0f), (0.1f, 8f, 3f)))
+      .ampBus.control(asr(dur2, (0.0f, 0.2f, 0.1f, 0.0f), (0.1f, 8f, 3f)))
       .buildInstruments()
 
     val pulse1Pan = panInstrument
@@ -208,7 +209,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.6f, 0.0f)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 2.1f, 0.0f)))
       .bwBus.control(line(dur, 0.0000001f, 0.0000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -217,7 +218,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.4f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 2.0f, 0.0f)))
       .bwBus.control(line(dur, 0.0000001f, 0.0000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -250,7 +251,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .widthBus.control(line(dur, 0.1f, 0.5f))
-      .ampBus.control(ar(dur, 0.9f, (0.0f, 0.05f, 0.0f)))
+      .ampBus.control(ar(dur, 0.9f, (0.0f, 0.5f, 0.0f)))
       .buildInstruments()
 
     val pulse2 = pulseInstrument
@@ -259,7 +260,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur, 0.5f, 0.1f))
-      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.05f, 0.0f)))
+      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.5f, 0.0f)))
       .buildInstruments()
 
     val pan = panInstrument
@@ -296,7 +297,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.1f, 0.0f)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.5f, 0.0f)))
       .bwBus.control(line(dur, 0.001f, 0.001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -305,7 +306,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.2f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.6f, 0.0f)))
       .bwBus.control(line(dur, 0.00001f, 0.00001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -341,7 +342,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.05f, 0.02f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.5f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -359,7 +360,7 @@ object Movement1 {
       .dur(dur2)
       .freqBus.control(line(dur2, note.melodyNote, note.melodyNote))
       .widthBus.control(line(dur2, 0.1f, 0.9f))
-      .ampBus.control(asr(dur2, (0.0f, 0.03f, 0.01f, 0.0f), (0.1f, 8f, 3f)))
+      .ampBus.control(asr(dur2, (0.0f, 0.3f, 0.1f, 0.0f), (0.1f, 8f, 3f)))
       .buildInstruments()
 
     val pulse1Pan = panInstrument
@@ -415,7 +416,7 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus2)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.01f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.6f, 0.0f)))
       .bwBus.control(line(dur, 0.000000000001f, 0.000000000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -441,7 +442,7 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus3)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.01f, 0.0f)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.6f, 0.0f)))
       .bwBus.control(line(dur, 0.000000000000000001f, 0.000000000000000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -475,7 +476,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .widthBus.control(line(dur, 0.5f, 0.1f))
-      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.05f, 0.0f), (EXPONENTIAL, EXPONENTIAL)))
+      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.6f, 0.0f), (EXPONENTIAL, EXPONENTIAL)))
       .buildInstruments()
 
     val pulse2 = pulseInstrument
@@ -484,7 +485,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur, 0.1f, 0.5f))
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.05f, 0.0f), (SINE, SINE)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.6f, 0.0f), (SINE, SINE)))
       .buildInstruments()
 
     val pan = panInstrument
@@ -522,7 +523,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.5f, 0.0f), (EXPONENTIAL, EXPONENTIAL)))
+      .ampBus.control(ar(dur, 0.1f, (0.0f, 1.5f, 0.0f), (EXPONENTIAL, EXPONENTIAL)))
       .bwBus.control(line(dur, 0.0000001f, 0.0000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -531,7 +532,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.3f, 0.0f), (SINE, SINE)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 1.3f, 0.0f), (SINE, SINE)))
       .bwBus.control(line(dur, 0.0000001f, 0.0000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -565,7 +566,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.05f, 0.02f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 1.5f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -615,7 +616,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .widthBus.control(line(dur, 0.5f, 0.9f))
-      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.01f, 0.0f)))
+      .ampBus.control(ar(dur, 0.1f, (0.0f, 0.1f, 0.0f)))
       .buildInstruments()
 
     val pulse2 = pulseInstrument
@@ -624,7 +625,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur, 0.9f, 0.5f))
-      .ampBus.control(ar(dur, 0.9f, (0.0f, 0.05f, 0.0f)))
+      .ampBus.control(ar(dur, 0.9f, (0.0f, 0.5f, 0.0f)))
       .buildInstruments()
 
     val pan = panInstrument
@@ -706,7 +707,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.05f, 0.02f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 1.5f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -724,7 +725,7 @@ object Movement1 {
       .dur(dur2)
       .freqBus.control(line(dur2, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur2, 0.1f, 0.9f))
-      .ampBus.control(asr(dur2, (0.0f, 0.02f, 0.01f, 0.0f), (0.1f, 8f, 3f)))
+      .ampBus.control(asr(dur2, (0.0f, 0.2f, 0.1f, 0.0f), (0.1f, 8f, 3f)))
       .buildInstruments()
 
     val pulse1Pan = panInstrument
@@ -780,7 +781,7 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus2)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.01f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.6f, 0.0f)))
       .bwBus.control(line(dur, 0.000000000000000001f, 0.000000000000000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -806,7 +807,7 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus3)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.01f, 0.0f)))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.6f, 0.0f)))
       .bwBus.control(line(dur, 0.000000000001f, 0.000000000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -839,7 +840,7 @@ object Movement1 {
       .dur(dur)
       .in(bus)
       .out(23)
-      .ampBus.control(line(dur, 0.1f, 0.1f))
+      .ampBus.control(line(dur, 0.2f, 0.1f))
       .buildInstruments()
 
     val delay = monoDelayReplaceInstrument
@@ -893,7 +894,7 @@ object Movement1 {
       .dur(dur)
       .in(bus)
       .out(25)
-      .ampBus.control(line(dur, 0.05f, 0.05f))
+      .ampBus.control(line(dur, 0.1f, 0.05f))
       .buildInstruments()
 
     val delay = monoDelayReplaceInstrument
