@@ -728,4 +728,6 @@ object Instruments {
   def monoDelayReplaceInstrument = new MonoDelayReplaceInstrumentBuilder
   def monoVolumeInstrument = new MonoVolumeBuilder
   def monoReplaceVolumeInstrument = new MonoVolumeReplaceBuilder
+  def allpassInstrument = new MonoAllpassInstrumentBuilder
+  def allpassReplaceInstrument = new MonoAllpassReplaceInstrumentBuilder
 }
