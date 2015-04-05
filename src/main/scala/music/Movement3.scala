@@ -2,6 +2,7 @@ package music
 
 import music.Instruments.ARControlInstrumentBuilder._
 import music.Instruments.LineControlInstrumentBuilder._
+import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
 import net.soundmining.MusicPlayer
 import net.soundmining.Utils._
@@ -16,6 +17,12 @@ import net.soundmining.Melody._
  * 1. Delta time. Make the duration a variant of that theme. Invert, retrograde or something.*
  * 2. Pulse speed
  * 3. The upper part. Transpose pitch up. Also use time.
+ *
+ * The effect
+ * Try phasing effect
+ * Allpass with Sine on delaytime
+ * See http://community.dur.ac.uk/nick.collins/teaching/supercollider/sctutorial/6.4%20Effects%201.html
+ *
  *
  */
 object Movement3 {
@@ -107,7 +114,16 @@ object Movement3 {
       .panBus.control(note.pan)
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(time), (pulse ++ highPass ++ lowPass ++ volume ++ whiteNoise ++ filterLower ++ filterUpper ++ lowerNote ++  upperNote ++ pan).toSeq: _*)
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(outBus)
+      .out(note.effectBus)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(time),
+      (pulse ++ highPass ++ lowPass ++ volume ++ whiteNoise ++ filterLower ++ filterUpper ++ lowerNote ++  upperNote ++ pan ++ effect).toSeq: _*)
 
   }
 
@@ -118,7 +134,7 @@ object Movement3 {
                        upperPulseVolumeControl: ControlInstrumentBuilder,
                        lowerNoiseVolumeControl: ControlInstrumentBuilder,
                        upperNoiseVolumeControl: ControlInstrumentBuilder,
-                       panControl: ControlInstrumentBuilder, soundBus: Int = 16) {
+                       panControl: ControlInstrumentBuilder, soundBus: Int = 16, effectBus: Int = 19) {
 
     lazy val delta: Float = {
       val startDur = (1f / pulseStartTime) * nrOfPulses
@@ -193,7 +209,7 @@ object Movement3 {
     val upperStart = upper
     val upperEnd = shift(1, upper)
 
-    def make: Seq[PulseNote] = {
+    def make: Seq[PulseNote] =
       (0 until pulse.length).map {
         i =>
           PulseNote(
@@ -203,9 +219,64 @@ object Movement3 {
             pulseVolumeControl(i), lowerPulseVolumeControl(i), upperPulseVolumeControl(i),
             lowerNoiseVolumeControl(i), upperNoiseVolumeControl(i), panControl(i), soundBus)
       }
-
-    }
   }
+
+
+  def effect1(implicit player: MusicPlayer): Unit = {
+    val bus = 19
+    val dur = 70
+
+    val volume = monoVolumeInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(23)
+      .ampBus.control(line(dur, 0.03f, 0.08f))
+      .buildInstruments()
+
+    val delay = monoDelayReplaceInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .delayBus.control(ar(dur, 0.3f, (0.03f, 0.055f, 0.02f), nodeId = EFFECT), sine(dur, 0.05f, 0.05f, 0.001f, 0.001f, nodeId = EFFECT))
+      .maxDelay(0.06f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.02f, 0.01f, nodeId = EFFECT), sine(dur, 0.06f, 0.05f, 0.05f, 0.06f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.007f, 0.009f, nodeId = EFFECT), sine(dur, 0.007f, 0.003f, 0.01f, 0.008f, nodeId = EFFECT))
+      .maxDelay(0.1f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.03f, 0.02f, nodeId = EFFECT), sine(dur, 0.09f, 0.05f, 0.05f, 0.09f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.01f, 0.009f, nodeId = EFFECT))
+      .maxDelay(0.01f)
+      .buildInstruments()
+
+    val pan = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .out(0)
+      .panBus.control(line(dur, 0.1f, -0.1f, EFFECT))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
+  }
+
+
 
   def thirdMovement(): Unit = {
     BusGenerator.reset()
@@ -288,10 +359,11 @@ object Movement3 {
 
     setupNodes(player)
 
+    effect1
+
     playPulseNotes(lowPulseNotes, 0f)
     playPulseNotes(middlePulseNotes, (1f / underSpectrum(21)) * 3)
     playPulseNotes(highPulseNotes, (1f / underSpectrum(30)) * 8)
-
 
     Thread.sleep(5000)
   }
