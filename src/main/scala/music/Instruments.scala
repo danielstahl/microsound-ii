@@ -25,9 +25,13 @@ object Instruments {
   sealed case class Node(nodeId: Integer)
   object SOURCE extends Node(1004)
   object EFFECT extends Node(1005)
+  object ROOM_EFFECT extends Node(1006)
 
   def setupNodes(player: MusicPlayer) = {
-    val osc = Seq(player.makeGroupHead(0, SOURCE.nodeId), player.makeGroupTail(SOURCE.nodeId, EFFECT.nodeId))
+    val osc = Seq(
+      player.makeGroupHead(0, SOURCE.nodeId),
+      player.makeGroupTail(SOURCE.nodeId, EFFECT.nodeId),
+      player.makeGroupTail(EFFECT.nodeId, ROOM_EFFECT.nodeId))
     player.sendBundle(absoluteTimeToMillis(0f), osc)
   }
 
@@ -711,6 +715,76 @@ object Instruments {
     val instrumentName: String = "monoAllpassReplace"
   }
 
+  class GverbInstrumentBuilder extends AbstractInstrumentBuilder with DurBuilder with InputBuilder with OutputBuilder {
+    type SelfType = GverbInstrumentBuilder
+    def self(): SelfType = this
+
+    val instrumentName: String = "gverb"
+
+    var roomSize: jl.Float = buildFloat(0f)
+
+    def roomSize(value: Float): SelfType = {
+      roomSize = buildFloat(value)
+      self()
+    }
+
+    var revTime: jl.Float = buildFloat(0f)
+
+    def revTime(value: Float): SelfType = {
+      revTime = buildFloat(value)
+      self()
+    }
+
+    var damping: jl.Float = buildFloat(0f)
+
+    def damping(value: Float): SelfType = {
+      damping = buildFloat(value)
+      self()
+    }
+
+    var inputBw: jl.Float = buildFloat(0f)
+
+    def inputBw(value: Float): SelfType = {
+      inputBw = buildFloat(value)
+      self()
+    }
+
+    var spread: jl.Float = buildFloat(0f)
+
+    def spread(value: Float): SelfType = {
+      spread = buildFloat(value)
+      self()
+    }
+
+    var earlyLevel: jl.Float = buildFloat(0f)
+
+    def earlyLevel(value: Float): SelfType = {
+      earlyLevel = buildFloat(value)
+      self()
+    }
+
+    var tailLevel: jl.Float = buildFloat(0f)
+
+    def tailLevel(value: Float): SelfType = {
+      tailLevel = buildFloat(value)
+      self()
+    }
+
+    override def build(): Seq[Object] =
+      super.build() ++
+        buildIn() ++
+        buildOut() ++
+        buildDur() ++
+        Seq(
+          "roomSize", roomSize,
+          "revTime", revTime,
+          "damping", damping,
+          "inputBw", inputBw,
+          "spread", spread,
+          "earlyLevel", earlyLevel,
+          "tailLevel", tailLevel)
+  }
+
   def lineControlInstrument = new LineControlInstrumentBuilder
   def pulseInstrument = new PulseInstrumentBuilder
   def filterInstrument = new FilterInstrumentBuilder
@@ -730,4 +804,5 @@ object Instruments {
   def monoReplaceVolumeInstrument = new MonoVolumeReplaceBuilder
   def allpassInstrument = new MonoAllpassInstrumentBuilder
   def allpassReplaceInstrument = new MonoAllpassReplaceInstrumentBuilder
+  def gverbInstrument = new GverbInstrumentBuilder
 }

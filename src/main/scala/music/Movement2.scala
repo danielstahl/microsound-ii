@@ -288,6 +288,25 @@ object Movement2 {
     rejectFilter ++ filter ++ noisePan
   }
 
+  def roomEffect(dur: Float): Seq[Seq[Object]] = {
+    val reverb = gverbInstrument
+      .nodeId(ROOM_EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(0)
+      .out(0)
+      .dur(dur)
+      .roomSize(5)
+      .revTime(0.6f)
+      .damping(0.62f)
+      .inputBw(0.48f)
+      .spread(15)
+      .earlyLevel(-11)
+      .tailLevel(-13)
+      .buildInstruments()
+
+    reverb
+  }
+
   /**
    * Microsound II part 2
    * This is what will be the second part of the piece Microsound II. It is
@@ -320,7 +339,9 @@ object Movement2 {
         makeNoise(dur, 20) ++
         makeNoiseFilter1(dur, 20, 21, 0.66f, 0f) ++
         makeNoiseFilter2(dur, 20, 22, 0f, -1f) ++
-        makeNoiseFilter3(dur, 20, 23, -0.66f, 1f)
+        makeNoiseFilter3(dur, 20, 23, -0.66f, 1f) ++
+        roomEffect(dur)
+
     player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
 
     Thread.sleep(1000)

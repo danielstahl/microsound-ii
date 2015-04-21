@@ -298,6 +298,25 @@ SynthDef(\monoAllpassReplace, {
 	ReplaceOut.ar(in, AllpassL.ar(input, maxDelay, delay, decay));
 }).add;
 
+SynthDef(\gverb, {
+	arg dur = 1, in = 0, out = 0,
+	roomSize, revTime, damping, inputBw,
+	spread = 15, earlyLevel, tailLevel;
+	var input;
+	Line.kr(dur:dur, doneAction:2);
+	input = In.ar(in, 2);
+	Out.ar(out,
+		GVerb.ar(Mix.new(input),
+		roomSize,
+        revTime,
+        damping,
+        inputBw,
+        spread,
+        0,
+        earlyLevel.dbamp,
+        tailLevel.dbamp,
+		roomSize, 0.3));
+}).add;
 
 SynthDef(\reverb, {
 	arg in = 0, out = 0, predelay = 0.048,

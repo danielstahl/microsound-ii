@@ -74,7 +74,6 @@ object Movement1 {
       .in(bus1)
       .out(bus2)
       .ampBus.control(ar(dur, 0.3f, (0.0f, 1.0f, 0.0f)))
-      //.bwBus.control(line(dur, 0.000000000000000001f, 0.000000000000000001f))
       .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -101,7 +100,6 @@ object Movement1 {
       .in(bus1)
       .out(bus3)
       .ampBus.control(ar(dur, 0.7f, (0.0f, 1.0f, 0.0f)))
-      //.bwBus.control(line(dur, 0.000000000001f, 0.000000000001f))
       .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -707,7 +705,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 1.5f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.5f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -725,7 +723,7 @@ object Movement1 {
       .dur(dur2)
       .freqBus.control(line(dur2, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .widthBus.control(line(dur2, 0.1f, 0.9f))
-      .ampBus.control(asr(dur2, (0.0f, 0.2f, 0.1f, 0.0f), (0.1f, 8f, 3f)))
+      .ampBus.control(asr(dur2, (0.0f, 0.1f, 0.1f, 0.0f), (0.1f, 8f, 3f)))
       .buildInstruments()
 
     val pulse1Pan = panInstrument
@@ -939,7 +937,27 @@ object Movement1 {
   }
 
 
-  case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int, effectBus: Int)
+  def roomEffect(implicit player: MusicPlayer): Unit = {
+    val dur = 50
+    val reverb = gverbInstrument
+      .nodeId(ROOM_EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(0)
+      .out(0)
+      .dur(dur)
+      .roomSize(5)
+      .revTime(0.6f)
+      .damping(0.62f)
+      .inputBw(0.48f)
+      .spread(15)
+      .earlyLevel(-11)
+      .tailLevel(-13)
+      .buildInstruments()
+
+      player.sendNew(absoluteTimeToMillis(0), reverb.toSeq:_*)
+  }
+
+    case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int, effectBus: Int)
 
   def firstMovement(): Unit = {
     BusGenerator.reset()
@@ -964,6 +982,7 @@ object Movement1 {
 
     effect1
     effect2
+    roomEffect
 
     (0 until notes.length).foreach {
       i =>

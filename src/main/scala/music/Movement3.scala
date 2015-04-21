@@ -276,7 +276,25 @@ object Movement3 {
     player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
   }
 
+  def roomEffect(implicit player: MusicPlayer): Unit = {
+    val dur = 70
+    val reverb = gverbInstrument
+      .nodeId(ROOM_EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(0)
+      .out(0)
+      .dur(dur)
+      .roomSize(5)
+      .revTime(0.6f)
+      .damping(0.62f)
+      .inputBw(0.48f)
+      .spread(15)
+      .earlyLevel(-11)
+      .tailLevel(-13)
+      .buildInstruments()
 
+    player.sendNew(absoluteTimeToMillis(0), reverb.toSeq:_*)
+  }
 
   def thirdMovement(): Unit = {
     BusGenerator.reset()
@@ -360,6 +378,7 @@ object Movement3 {
     setupNodes(player)
 
     effect1
+    roomEffect
 
     playPulseNotes(lowPulseNotes, 0f)
     playPulseNotes(middlePulseNotes, (1f / underSpectrum(21)) * 3)
