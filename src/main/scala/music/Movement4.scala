@@ -25,7 +25,7 @@ import net.soundmining.Melody._
  *
  *
  */
-object Movement3 {
+object Movement4 {
 
   def playPulse(time: Float, note: PulseNote)(implicit player: MusicPlayer): Unit = {
     val dur = note.delta - (1f / note.pulseEndTime / 2)
