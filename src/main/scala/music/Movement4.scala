@@ -4,13 +4,15 @@ import music.Instruments.ARControlInstrumentBuilder._
 import music.Instruments.LineControlInstrumentBuilder._
 import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
-import net.soundmining.MusicPlayer
+import net.soundmining.Instrument.{ROOM_EFFECT, EFFECT, TAIL_ACTION}
+import net.soundmining.{BusGenerator, ControlInstrumentBuilder, MusicPlayer}
 import net.soundmining.Utils._
 import Piece._
 import net.soundmining.Melody._
+import net.soundmining.Instrument._
 
 /**
- * Third movement in microsound II
+ * Fourth movement in microsound II
  *
  * Lower Pulse
  * Use theme from first movement
@@ -123,7 +125,7 @@ object Movement4 {
       .buildInstruments()
 
     player.sendNew(absoluteTimeToMillis(time),
-      (pulse ++ highPass ++ lowPass ++ volume ++ whiteNoise ++ filterLower ++ filterUpper ++ lowerNote ++  upperNote ++ pan ++ effect).toSeq: _*)
+      pulse ++ highPass ++ lowPass ++ volume ++ whiteNoise ++ filterLower ++ filterUpper ++ lowerNote ++ upperNote ++ pan ++ effect)
 
   }
 
@@ -187,7 +189,7 @@ object Movement4 {
 
   def playPulseNotes(notes: Seq[PulseNote], startTime: Float)(implicit player: MusicPlayer): Unit = {
     var tempTime = startTime
-    (0 until notes.length).foreach {
+    notes.indices.foreach {
       i =>
         playPulse(tempTime, notes(i))
         tempTime += notes(i).delta
@@ -210,7 +212,7 @@ object Movement4 {
     val upperEnd = shift(1, upper)
 
     def make: Seq[PulseNote] =
-      (0 until pulse.length).map {
+      pulse.indices.map {
         i =>
           PulseNote(
             underSpectrum(startPulse(i)), underSpectrum(endPulse(i)), nbrOfPulses(i),
@@ -273,7 +275,7 @@ object Movement4 {
       .panBus.control(line(dur, 0.1f, -0.1f, EFFECT))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(0), volume ++ delay ++ combFilter ++ allpassFilter ++ pan)
   }
 
   def roomEffect(implicit player: MusicPlayer): Unit = {
@@ -293,10 +295,10 @@ object Movement4 {
       .tailLevel(-13)
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(0), reverb.toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(0), reverb)
   }
 
-  def thirdMovement(): Unit = {
+  def forthMovement(): Unit = {
     BusGenerator.reset()
     implicit val player: MusicPlayer = MusicPlayer()
 
@@ -388,6 +390,6 @@ object Movement4 {
   }
 
   def main(args: Array[String]): Unit = {
-    thirdMovement()
+    forthMovement()
   }
 }

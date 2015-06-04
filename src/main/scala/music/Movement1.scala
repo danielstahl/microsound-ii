@@ -6,8 +6,9 @@ import music.Instruments.LineControlInstrumentBuilder._
 import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
 import music.Piece._
+import net.soundmining.Instrument._
 import net.soundmining.Melody._
-import net.soundmining.MusicPlayer
+import net.soundmining.{BusGenerator, MusicPlayer}
 import net.soundmining.Utils._
 
 /**
@@ -37,18 +38,18 @@ object Movement1 {
       .buildInstruments()
 
 
-    player.sendNew(absoluteTimeToMillis(start), pulse.toSeq: _*)
+    player.sendNew(absoluteTimeToMillis(start), pulse.toSeq)
   }
 
   def playMelody(melody: Seq[Float])(implicit player: MusicPlayer): Unit = {
-    (0 until melody.length).foreach {
+    melody.indices.foreach {
       i => playNote(i, 0.5f, melody(i))
     }
   }
 
   def playMelody(melody: Seq[Float], durMelody: Seq[Float])(implicit player: MusicPlayer): Unit = {
     var tmpTime = 0f
-    (0 until melody.length).foreach {
+    melody.indices.foreach {
       i =>
         playNote(tmpTime, 0.5f, melody(i))
         tmpTime = tmpTime + durMelody(i)
@@ -120,7 +121,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2)
   }
 
   def note2(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -189,7 +190,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2)
   }
 
   def note3(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -237,7 +238,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ filter2 ++ pan ++ effect)
   }
 
   def note4(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -277,7 +278,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ pulse2 ++ pan ++ effect)
   }
 
 
@@ -325,7 +326,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ filter2 ++ pan ++ effect)
   }
 
   def note6(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -393,7 +394,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2)
   }
 
   def note7(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -461,7 +462,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2)
   }
 
   def note8(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -502,7 +503,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ pulse2 ++ pan ++ effect)
 
   }
 
@@ -551,7 +552,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ filter2 ++ pan ++ effect)
   }
 
   def note10(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -602,7 +603,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ filter2 ++ pulsePan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ filter1 ++ filter2 ++ pulsePan ++ effect)
   }
 
   def note11(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -642,7 +643,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ pulse2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ pulse2 ++ pan ++ effect)
   }
 
   def note12(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -689,7 +690,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ filter2 ++ pan ++ effect).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ filter2 ++ pan ++ effect)
   }
 
   def note13(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -758,7 +759,7 @@ object Movement1 {
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(note.startTime), (pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), pulse1 ++ filter1 ++ pulse2 ++ pulse1Pan ++ effect1 ++ pulse2Pan ++ effect2)
   }
 
   def note14(note: Note)(implicit player: MusicPlayer): Unit = {
@@ -825,7 +826,7 @@ object Movement1 {
       .out(note.effectBus)
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
-    player.sendNew(absoluteTimeToMillis(note.startTime), (noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(note.startTime), noise ++ filter1 ++ pan1 ++ effect1 ++ filter2 ++ pan2 ++ effect2)
   }
 
   def effect1(implicit player: MusicPlayer): Unit = {
@@ -879,7 +880,7 @@ object Movement1 {
       .panBus.control(line(dur, 1f, -1f, EFFECT))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(0), volume ++ delay ++ combFilter ++ allpassFilter ++ pan)
   }
 
   def effect2(implicit player: MusicPlayer): Unit = {
@@ -933,7 +934,7 @@ object Movement1 {
       .panBus.control(line(dur, -1f, 1f, EFFECT))
       .buildInstruments()
 
-    player.sendNew(absoluteTimeToMillis(0), (volume ++ delay ++ combFilter ++ allpassFilter ++ pan).toSeq:_*)
+    player.sendNew(absoluteTimeToMillis(0), volume ++ delay ++ combFilter ++ allpassFilter ++ pan)
   }
 
 
@@ -954,7 +955,7 @@ object Movement1 {
       .tailLevel(-13)
       .buildInstruments()
 
-      player.sendNew(absoluteTimeToMillis(0), reverb.toSeq:_*)
+      player.sendNew(absoluteTimeToMillis(0), reverb)
   }
 
     case class Note(melodyNote: Float, retrogradeMelodyNote: Float, startTime: Float, deltaTime: Float, soundBus: Int, effectBus: Int)
@@ -984,7 +985,7 @@ object Movement1 {
     effect2
     roomEffect
 
-    (0 until notes.length).foreach {
+    notes.indices.foreach {
       i =>
         notes(i)(Note(concreteMelody(i), concreteRetrogradeMelody(i), absoluteTime(i), concreteRhythm(i), channels(i), effectBus(i)))
     }

@@ -65,18 +65,18 @@ SynthDef(\pinkNoise, {
 	arg dur = 1, ampBus = 0, out = 0;
 	var noise, amp;
 	Line.kr(dur:dur, doneAction:2);
-	noise = PinkNoise.ar();
 	amp = In.kr(ampBus);
-	Out.ar(out, noise * amp);
+	noise = PinkNoise.ar(amp);
+	Out.ar(out, noise);
 }).add;
 
 SynthDef(\whiteNoise, {
 	arg dur = 1, ampBus = 0, out = 0;
 	var noise, amp;
 	Line.kr(dur:dur, doneAction:2);
-	noise = WhiteNoise.ar();
 	amp = In.kr(ampBus);
-	Out.ar(out, noise * amp);
+	noise = WhiteNoise.ar(amp);
+	Out.ar(out, noise);
 }).add;
 
 SynthDef(\pulse, {

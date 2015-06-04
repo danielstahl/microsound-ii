@@ -1,8 +1,10 @@
 package music
 
 import music.Instruments._
-import net.soundmining.MusicPlayer
+import net.soundmining.Instrument.{ROOM_EFFECT, TAIL_ACTION}
+import net.soundmining.{BusGenerator, MusicPlayer}
 import net.soundmining.Utils._
+import net.soundmining.Instrument._
 
 /**
  * The second movement
@@ -342,7 +344,7 @@ object Movement2 {
         makeNoiseFilter3(dur, 20, 23, -0.66f, 1f) ++
         roomEffect(dur)
 
-    player.sendNew(absoluteTimeToMillis(0f), messages.toSeq: _*)
+    player.sendNew(absoluteTimeToMillis(0f), messages)
 
     Thread.sleep(1000)
   }
