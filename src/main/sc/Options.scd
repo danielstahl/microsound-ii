@@ -9,6 +9,11 @@ Server.local.options.numBuffers = 2056;
 Server.internal.options.numBuffers = 2056;
 )
 
+(
+Server.local.options.device = "Scarlett 2i2 USB";
+Server.internal.options.device = "Scarlett 2i2 USB";
+)
+
 s.boot;
 s.shutdown;
 s.plotTree;
@@ -32,6 +37,9 @@ SynthDescLib.global.browse;
 )
 
 // Record
-s.prepareForRecord;
+
+s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-I/mvnt-I_sc.aiff');
+s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-II/mvnt-II_sc.aiff');
+s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-IV/mvnt-IV_sc.aiff');
 s.record;
 s.stopRecording;

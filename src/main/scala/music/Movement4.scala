@@ -29,6 +29,41 @@ import net.soundmining.Instrument._
  */
 object Movement4 {
 
+  def playNoise(time: Float, duration: Float, noiseFilters: Seq[(Int, Int)], bwBuses: Seq[(Float, Float)], attack: Float, filtAmp: Float, pan: (Float, Float))(implicit player: MusicPlayer): Unit = {
+    val dur = duration
+    val outBus = 20
+
+    val noise = whiteNoiseInstrument
+      .addAction(TAIL_ACTION)
+      .out(outBus)
+      .dur(dur)
+      .ampBus.control(ar(dur, attack, (0f, 1f, 0f)))
+      .buildInstruments()
+
+    val filters = noiseFilters.indices.flatMap {
+      index =>
+        filterRejectReplaceInstrument
+          .addAction(TAIL_ACTION)
+          .in(outBus)
+          .dur(dur)
+          .ampBus.control(ar(dur, attack, (0f, filtAmp, 0f)))
+          .bwBus.control(line(dur, bwBuses(index)._1, bwBuses(index)._2))
+          .freqBus.control(line(dur, overSpectrum(noiseFilters(index)._1), overSpectrum(noiseFilters(index)._2)))
+          .buildInstruments()
+    }.toSeq
+
+    val (startPan, endPan) = pan
+    val pan1 = panInstrument
+      .addAction(TAIL_ACTION)
+      .in(outBus)
+      .out(0)
+      .dur(dur)
+      .panBus.control(line(dur, startPan, endPan))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(time), noise ++ filters ++ pan1)
+  }
+
   def playPulse(time: Float, note: PulseNote)(implicit player: MusicPlayer): Unit = {
     val dur = note.delta - (1f / note.pulseEndTime / 2)
     val outBus = note.soundBus
@@ -223,7 +258,6 @@ object Movement4 {
       }
   }
 
-
   def effect1(implicit player: MusicPlayer): Unit = {
     val bus = 19
     val dur = 70
@@ -234,7 +268,7 @@ object Movement4 {
       .dur(dur)
       .in(bus)
       .out(23)
-      .ampBus.control(line(dur, 0.03f, 0.08f))
+      .ampBus.control(line(dur, 0.3f, 0.5f))
       .buildInstruments()
 
     val delay = monoDelayReplaceInstrument
@@ -298,25 +332,22 @@ object Movement4 {
     player.sendNew(absoluteTimeToMillis(0), reverb)
   }
 
-  def forthMovement(): Unit = {
-    BusGenerator.reset()
-    implicit val player: MusicPlayer = MusicPlayer()
+  def attackVolume(peak: Float) = ar(1, 0.3f, (0.0f, peak, 0.0f))
+  def decayVolume(peak: Float) = ar(1, 0.7f, (0.0f, peak, 0.0f))
+  def middleVolume(peak: Float) = ar(2, 0.5f, (0.0f, peak, 0.0f))
 
-    def attackVolume(peak: Float) = ar(1, 0.3f, (0.0f, peak, 0.0f))
-    def decayVolume(peak: Float) = ar(1, 0.7f, (0.0f, peak, 0.0f))
-    def middleVolume(peak: Float) = ar(2, 0.5f, (0.0f, peak, 0.0f))
+  val mostLefToSlightLeft = line(1f, -1f, -0.5f)
 
-    val pulseVolumes = Seq(middleVolume(3f), decayVolume(3f), attackVolume(3f), middleVolume(3f), decayVolume(3f), attackVolume(3f))
-    val lowerPulseVolumes = Seq(attackVolume(0.01f), middleVolume(0.01f), decayVolume(0.01f), attackVolume(0.01f), middleVolume(0.01f), decayVolume(0.01f))
-    val upperPulseVolumes = Seq(decayVolume(0.01f), attackVolume(0.01f), middleVolume(0.01f), decayVolume(0.01f), attackVolume(0.01f), middleVolume(0.01f))
-    val lowerNoiseVolumes = Seq(attackVolume(0.4f), middleVolume(0.4f), decayVolume(0.4f), attackVolume(0.4f), middleVolume(0.4f), decayVolume(0.4f))
-    val upperNoiseVolumes = Seq(decayVolume(0.4f), attackVolume(0.4f), middleVolume(0.4f), decayVolume(0.4f), attackVolume(0.4f), middleVolume(0.4f))
+  val slightLeftToSlightRight = line(1f, -0.5f, 0.5f)
 
-    val mostLefToSlightLeft = line(1f, -1f, -0.5f)
+  val slightRightToMostRight = line(1f, 0.5f, 1f)
 
-    val slightLeftToSlightRight = line(1f, -0.5f, 0.5f)
-
-    val slightRightToMostRight = line(1f, 0.5f, 1f)
+  def makeLowPulseMelody(): Seq[PulseNote] = {
+    val pulseVolumes = Seq(middleVolume(0.05f), decayVolume(0.12f), attackVolume(0.07f), middleVolume(0.15f), decayVolume(0.07f), attackVolume(0.05f))
+    val lowerPulseNoteVolumes = Seq(attackVolume(0.008f), middleVolume(0.01f), decayVolume(0.02f), attackVolume(0.01f), middleVolume(0.008f), decayVolume(0.02f))
+    val upperPulseNoteVolumes = Seq(decayVolume(0.008f), attackVolume(0.01f), middleVolume(0.02f), decayVolume(0.01f), attackVolume(0.008f), middleVolume(0.02f))
+    val lowerNoiseVolumes = Seq(attackVolume(0.6f), middleVolume(0.4f), decayVolume(0.3f), attackVolume(0.2f), middleVolume(0.4f), decayVolume(0.2f))
+    val upperNoiseVolumes = Seq(decayVolume(0.6f), attackVolume(0.4f), middleVolume(0.3f), decayVolume(0.2f), attackVolume(0.4f), middleVolume(0.2f))
 
     val lowPulseMelody = PulseMelodyData(
       pulse = Seq(13, 20, 13, 20, 13, 20),
@@ -324,8 +355,8 @@ object Movement4 {
       lower = Seq(3, 2, 3, 2, 3, 2),
       upper = Seq(4, 5, 4, 5, 4, 5),
       pulseVolumeControl = pulseVolumes,
-      lowerPulseVolumeControl = lowerPulseVolumes,
-      upperPulseVolumeControl = upperPulseVolumes,
+      lowerPulseVolumeControl = lowerPulseNoteVolumes,
+      upperPulseVolumeControl = upperPulseNoteVolumes,
       lowerNoiseVolumeControl = lowerNoiseVolumes,
       upperNoiseVolumeControl = upperNoiseVolumes,
       panControl = Seq(
@@ -333,8 +364,15 @@ object Movement4 {
         mostLefToSlightLeft, mostLefToSlightLeft.reverse,
         mostLefToSlightLeft, mostLefToSlightLeft.reverse)
     )
+    lowPulseMelody.make
+  }
 
-    val lowPulseNotes = lowPulseMelody.make
+  def makeHighPulseMelody(): Seq[PulseNote] = {
+    val pulseVolumes = Seq(middleVolume(0.5f), decayVolume(0.7f), attackVolume(0.1f), middleVolume(0.7f), decayVolume(0.3f), attackVolume(0.5f))
+    val lowerPulseNoteVolumes = Seq(attackVolume(0.008f), middleVolume(0.01f), decayVolume(0.02f), attackVolume(0.008f), middleVolume(0.01f), decayVolume(0.02f))
+    val upperPulseNoteVolumes = Seq(decayVolume(0.008f), attackVolume(0.01f), middleVolume(0.02f), decayVolume(0.008f), attackVolume(0.01f), middleVolume(0.02f))
+    val lowerNoiseVolumes = Seq(attackVolume(0.3f), middleVolume(0.4f), decayVolume(0.5f), attackVolume(0.4f), middleVolume(0.5f), decayVolume(0.3f))
+    val upperNoiseVolumes = Seq(decayVolume(0.3f), attackVolume(0.4f), middleVolume(0.5f), decayVolume(0.4f), attackVolume(0.5f), middleVolume(0.3f))
 
     val highPulseMelody = PulseMelodyData(
       pulse = Seq(30, 36, 30, 36/*, 30, 36*/),
@@ -342,8 +380,8 @@ object Movement4 {
       lower = Seq(60, 63, 60, 63, 60, 63),
       upper = Seq(70, 64, 70, 64, 70, 64),
       pulseVolumeControl = pulseVolumes,
-      lowerPulseVolumeControl = lowerPulseVolumes,
-      upperPulseVolumeControl = upperPulseVolumes,
+      lowerPulseVolumeControl = lowerPulseNoteVolumes,
+      upperPulseVolumeControl = upperPulseNoteVolumes,
       lowerNoiseVolumeControl = lowerNoiseVolumes,
       upperNoiseVolumeControl = upperNoiseVolumes,
       panControl = Seq(
@@ -353,7 +391,15 @@ object Movement4 {
       soundBus = 17
     )
 
-    val highPulseNotes = highPulseMelody.make
+    highPulseMelody.make
+  }
+
+  def makeMiddlePulseMelody(): Seq[PulseNote] = {
+    val pulseVolumes = Seq(middleVolume(0.2f), decayVolume(0.6f), attackVolume(0.4f), middleVolume(0.6f), decayVolume(0.4f), attackVolume(0.2f))
+    val lowerPulseNoteVolumes = Seq(attackVolume(0.02f), middleVolume(0.01f), decayVolume(0.008f), attackVolume(0.02f), middleVolume(0.02f), decayVolume(0.008f))
+    val upperPulseNoteVolumes = Seq(decayVolume(0.02f), attackVolume(0.01f), middleVolume(0.008f), decayVolume(0.02f), attackVolume(0.02f), middleVolume(0.008f))
+    val lowerNoiseVolumes = Seq(attackVolume(0.3f), middleVolume(0.4f), decayVolume(0.5f), attackVolume(0.3f), middleVolume(0.4f), decayVolume(0.5f))
+    val upperNoiseVolumes = Seq(decayVolume(0.3f), attackVolume(0.4f), middleVolume(0.5f), decayVolume(0.3f), attackVolume(0.4f), middleVolume(0.5f))
 
     val middlePulseMelody = PulseMelodyData(
       pulse = Seq(21, 23, 21, 23),
@@ -361,8 +407,8 @@ object Movement4 {
       lower = Seq(30, 25, 30, 25),
       upper = Seq(40, 35, 40, 35),
       pulseVolumeControl = pulseVolumes,
-      lowerPulseVolumeControl = lowerPulseVolumes,
-      upperPulseVolumeControl = upperPulseVolumes,
+      lowerPulseVolumeControl = lowerPulseNoteVolumes,
+      upperPulseVolumeControl = upperPulseNoteVolumes,
       lowerNoiseVolumeControl = lowerNoiseVolumes,
       upperNoiseVolumeControl = upperNoiseVolumes,
       panControl = Seq(
@@ -373,14 +419,34 @@ object Movement4 {
       soundBus = 18
     )
 
-    val middlePulseNotes = middlePulseMelody.make
+    middlePulseMelody.make
+  }
 
-    player.startPlay()
+  def forthMovement(): Unit = {
+    BusGenerator.reset()
+    implicit val player: MusicPlayer = MusicPlayer()
+
+    val lowPulseNotes = makeLowPulseMelody()
+
+    val highPulseNotes = makeHighPulseMelody()
+
+    val middlePulseNotes = makeMiddlePulseMelody()
+
+      player.startPlay()
 
     setupNodes(player)
 
     effect1
-    roomEffect
+    //roomEffect
+
+    val noiseFilter1 = Seq((3, 2), (40, 35) , (64, 70))
+    val noiseBw1 = Seq((.01f, .01f), (.0001f, .0001f), (.0005f, .0002f))
+
+    val noiseFilter2 = Seq((5, 4), (25, 30), (60, 63))
+    val noiseBw2 = Seq((.01f, .05f), (.0002f, .0001f), (.00015f, .00030f))
+
+    playNoise(0f, 80, noiseFilter1, noiseBw1, 0.3f, 0.2f, (-.5f, .5f))
+    playNoise(0f, 80, noiseFilter2, noiseBw2, 0.7f, 0.4f, (.5f, -.5f))
 
     playPulseNotes(lowPulseNotes, 0f)
     playPulseNotes(middlePulseNotes, (1f / underSpectrum(21)) * 3)

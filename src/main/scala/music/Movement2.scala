@@ -23,7 +23,7 @@ object Movement2 {
       .dur(dur)
       .freqBus.control(line(dur, underSpectrum(149), underSpectrum(98)))
       .widthBus.control(line(dur, underSpectrum(48), underSpectrum(34)))
-      .ampBus.control(line(dur, 0.1f, 0.5f))
+      .ampBus.control(line(dur, 0.03f, 0.05f))
       .buildInstruments()
 
     val pulsePan = panInstrument
@@ -199,7 +199,7 @@ object Movement2 {
       .dur(dur)
       .in(audioInBus)
       .out(audioOutBus)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.05f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.01f, 0.0f)))
       .bwBus.control(line(dur, 0.01f, 0.001f))
       .freqBus.control(line(dur, overSpectrum(5), overSpectrum(6)))
       .buildInstruments()
@@ -334,6 +334,7 @@ object Movement2 {
     setupNodes(player)
 
     val messages =
+      //roomEffect(dur) ++
       makePulse(dur, 0.33f, -0.66f) ++
         makePulseFilter1(dur, 17, -1f, 0.66f) ++
         makePulseFilter2(dur, 18, -0.33f, 0.33f) ++
@@ -341,8 +342,8 @@ object Movement2 {
         makeNoise(dur, 20) ++
         makeNoiseFilter1(dur, 20, 21, 0.66f, 0f) ++
         makeNoiseFilter2(dur, 20, 22, 0f, -1f) ++
-        makeNoiseFilter3(dur, 20, 23, -0.66f, 1f) ++
-        roomEffect(dur)
+        makeNoiseFilter3(dur, 20, 23, -0.66f, 1f)
+
 
     player.sendNew(absoluteTimeToMillis(0f), messages)
 

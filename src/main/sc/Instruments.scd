@@ -541,3 +541,4 @@ Synth("lineControl", [dur: 30, startValue: 0.7, endValue: 0.8, out: 17], addActi
 Synth("pan", [dur: 30, panBus: 17, in: 18, out: 0], addAction:\addToTail);
 
 )
+

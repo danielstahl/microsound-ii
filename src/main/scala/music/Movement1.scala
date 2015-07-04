@@ -66,7 +66,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .out(bus1)
       .dur(dur)
-      .ampBus.control(line(dur, 1f, 1f))
+      .ampBus.control(line(dur, 1.0f, 1.0f))
       .buildInstruments()
 
     val filter1 = filterInstrument
@@ -74,8 +74,9 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus2)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 1.0f, 0.0f)))
-      .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.5f, 0.0f)))
+      .bwBus.control(line(dur, 0.000000000000000000001f,
+                               0.000000000000000000001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
 
@@ -100,8 +101,9 @@ object Movement1 {
       .dur(dur)
       .in(bus1)
       .out(bus3)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 1.0f, 0.0f)))
-      .bwBus.control(line(dur, 0.000000000000000000001f, 0.000000000000000000001f))
+      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.5f, 0.0f)))
+      .bwBus.control(line(dur, 0.000000000000000000001f,
+                               0.000000000000000000001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
 
@@ -137,7 +139,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.5f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.15f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -341,7 +343,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.5f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.25f, 0.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -649,6 +651,7 @@ object Movement1 {
   def note12(note: Note)(implicit player: MusicPlayer): Unit = {
     val dur = 0.8f
     val bus = note.soundBus
+
     val noise = whiteNoiseInstrument
       .addAction(TAIL_ACTION)
       .out(bus)
@@ -660,7 +663,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.1f, 0.0f)))
+      .ampBus.control(ar(dur, 0.3f, (0.0f, 0.3f, 0.0f)))
       .bwBus.control(line(dur, 0.001f, 0.001f))
       .freqBus.control(line(dur, note.melodyNote, note.melodyNote))
       .buildInstruments()
@@ -669,7 +672,7 @@ object Movement1 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .ampBus.control(ar(dur, 0.7f, (0.0f, 0.2f, 0.0f)))
+      .ampBus.control(ar(dur, 0.5f, (0.0f, 0.5f, 0.0f)))
       .bwBus.control(line(dur, 0.00001f, 0.00001f))
       .freqBus.control(line(dur, note.retrogradeMelodyNote, note.retrogradeMelodyNote))
       .buildInstruments()
@@ -706,7 +709,7 @@ object Movement1 {
       .dur(dur)
       .freqBus.control(line(dur, 0.1f, 0.1f))
       .widthBus.control(line(dur, 0.1f, 0.9f))
-      .ampBus.control(asr(dur, (0.0f, 0.5f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
+      .ampBus.control(asr(dur, (0.0f, 0.3f, 1.2f, 0.0f), (0.01f, 8f, 3f)))
       .buildInstruments()
 
     val filter1 = filterReplaceInstrument
@@ -968,7 +971,6 @@ object Movement1 {
 
     setupNodes(player)
 
-
     val retrogradeMelody = retrograde(inverse(transpose(70, melody)))
     val concreteMelody = concrete(melody, overSpectrum)
     val concreteRetrogradeMelody = concrete(retrogradeMelody, overSpectrum)
@@ -978,12 +980,11 @@ object Movement1 {
     val channels = Seq(16, 19, 16, 19, 16, 19, 16, 19, 16, 19, 16, 19, 16, 19)
 
     val effectBus = Seq(22, 24, 24, 22, 22, 24, 22, 24, 24, 24, 22, 22, 24, 24)
-
     val notes: Seq[Note => Unit] = Seq(note1, note2, note3, note4, note5, note6, note7, note8, note9, note10, note11, note12, note13, note14)
 
     effect1
     effect2
-    roomEffect
+    //roomEffect
 
     notes.indices.foreach {
       i =>
