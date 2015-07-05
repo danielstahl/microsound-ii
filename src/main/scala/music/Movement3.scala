@@ -5,9 +5,10 @@ import music.Instruments._
 import music.Piece._
 import net.soundmining.Instrument._
 import net.soundmining.Melody._
-import net.soundmining.{BusGenerator, MusicPlayer}
+import net.soundmining.{ControlInstrumentBuilder, BusGenerator, MusicPlayer}
 import net.soundmining.Utils._
 import ARControlInstrumentBuilder._
+import ASRControlInstrumentBuilder._
 
 /**
  * This is the third movement
@@ -28,7 +29,7 @@ object Movement3 {
    */
   case class SubtractiveNote(startTime: Float, duration: Float, amp: Float, pan: (Float, Float), filters: Seq[(Float, Float, Float)], attackPoint: Float, bus: Int)
 
-  case class PulseNote(startTime: Float, duration: Float, amp: Float, attackPoint: Float, pan: (Float, Float), pulseFreq: (Float, Float), highPass: (Float, Float), lowPass: (Float, Float), bus: Int)
+  case class PulseNote(startTime: Float, duration: Float, amp: Float, attackPoint: Float, pan: (Float, Float), pulseFreq: /*(Float, Float)*/ControlInstrumentBuilder, highPass: (Float, Float), lowPass: (Float, Float), bus: Int)
 
   def subractiveFreqs(freqs: Seq[(Int, Int, Float)]): Seq[(Float, Float, Float)] =
     freqs.map {
@@ -52,7 +53,7 @@ object Movement3 {
     val amp = note.amp
     val attackPoint = note.attackPoint
 
-    val (pulseFreqStart, pulseFreqEnd) = note.pulseFreq
+    //val (pulseFreqStart, pulseFreqEnd) = note.pulseFreq
     val (highPassStart, highPassEnd) = note.highPass
     val (lowPassStart, lowPassEnd) = note.lowPass
 
@@ -60,7 +61,8 @@ object Movement3 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .out(bus)
-      .freqBus.control(line(dur, pulseFreqStart, pulseFreqEnd))
+      //.freqBus.control(line(dur, pulseFreqStart, pulseFreqEnd))
+      .freqBus.control(note.pulseFreq)
       .ampBus.control(ar(dur, attackPoint, (0f, amp, 0f)))
       .widthBus.control(line(dur, 0.5f, 0.5f))
       .buildInstruments()
@@ -88,6 +90,7 @@ object Movement3 {
       .panBus.control(line(dur, 0.1f, -0.1f))
       .buildInstruments()
 
+    println(s"Pulse start $start ${absoluteTimeToMillis(start)} and duration $dur")
     player.sendNew(absoluteTimeToMillis(start), pulse ++ highPass ++ lowPass ++ pan)
   }
 
@@ -106,14 +109,14 @@ object Movement3 {
       .buildInstruments()
 
     val filters = note.filters.flatMap {
-      case (start, end, attack) =>
+      case (startFreq, endFreq, attackPoint) =>
         filterReplaceInstrument
           .addAction(TAIL_ACTION)
           .in(bus)
           .dur(dur)
-          .ampBus.control(ar(dur, attack, (0f, 1f, 0f)))
+          .ampBus.control(ar(dur, attackPoint, (0f, 1f, 0f)))
           .bwBus.control(line(dur, 0.00000001f, 0.000000001f))
-          .freqBus.control(line(dur, start, end))
+          .freqBus.control(line(dur, startFreq, endFreq))
           .buildInstruments()
     }
 
@@ -160,15 +163,29 @@ object Movement3 {
     val pulseNotes = Seq(
         PulseNote(
         startTime = 0f,
-        duration = 25,
+        duration = 10f,
         amp = 1f,
         attackPoint = 0.1f,
         pan = (0.1f, -0.1f),
-        pulseFreq = pulseFreq(0, 30),
+        //pulseFreq = pulseFreq(0, 30),
+        pulseFreq = line(10, underSpectrum(0), underSpectrum(30)),
         highPass = highPass(95, 4),
         lowPass = lowPass(100, 6),
         bus = 16
-      )
+      ),
+      PulseNote(
+        startTime = 10f,
+        duration = 10f,
+        amp = 1f,
+        attackPoint = 0.1f,
+        pan = (-0.1f, 0.5f),
+        //pulseFreq = pulseFreq(0, 30),
+        pulseFreq = asr(10f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.1f, 0.6f, 0.3f)),
+        highPass = highPass(95, 4),
+        lowPass = lowPass(100, 6),
+        bus = 17)
+
+
     )
 
     pulseNotes.foreach(pulse)

@@ -22,12 +22,12 @@ Synth("pulse", [dur: 10, amp: 1, ampBus: 0, freqBus: 1, widthBus: 2, out: 0], ad
 SynthDef(\lineControl, {
 	arg dur = 1, startValue = 1, endValue = 1, out = 0;
 	var lineEnv;
-	lineEnv = Line.kr(startValue, endValue, dur, doneAction:2);
+	lineEnv = Line.kr(start: startValue, end: endValue, dur: dur, doneAction:2);
 	Out.kr(out, lineEnv);
 }).add;
 
 SynthDef(\asrControl, {
-	arg dur, out = 0,
+	arg dur = 1, out = 0,
 	attackStart, sustainStart, decayStart, decayEnd,
 	attackTime, sustainTime, decayTime;
 	var asrEnv;
@@ -40,7 +40,7 @@ SynthDef(\asrControl, {
 }).add;
 
 SynthDef(\arControl, {
-	arg dur, out = 0,
+	arg dur = 1, out = 0,
 	attackStart, releaseStart, releaseEnd,
 	attackTime, attackType = \linear, releaseType = \linear;
 	var arEnv;
@@ -53,7 +53,7 @@ SynthDef(\arControl, {
 }).add;
 
 SynthDef(\sineControlReplace, {
-	arg dur, in = 0, startFreq = 1, endFreq = 1, startAmp = 1, endAmp = 1;
+	arg dur = 1, in = 0, startFreq = 1, endFreq = 1, startAmp = 1, endAmp = 1;
 	var freqEnv, input, ampEnv;
 	freqEnv = Line.kr(startFreq, endFreq, dur, doneAction:2);
 	ampEnv = Line.kr(startAmp, endAmp, dur);
