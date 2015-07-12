@@ -1,6 +1,7 @@
 package music
 
 import music.Instruments.LineControlInstrumentBuilder._
+import music.Instruments.SineControlReplaceInstrumentBuilder._
 import music.Instruments._
 import music.Movement3.SubtractiveNote
 import music.Piece._
@@ -81,7 +82,6 @@ object Movement3 {
       .freqBus.control(line(dur, lowPassStart, lowPassEnd))
       .buildInstruments()
 
-
     val pan = panInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
@@ -90,8 +90,16 @@ object Movement3 {
       .panBus.control(line(dur, panStart, panEnd))
       .buildInstruments()
 
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(22)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     println(s"Pulse start $start (${absoluteTimeToMillis(start)}) and duration $dur")
-    player.sendNew(absoluteTimeToMillis(start), pulse ++ highPass ++ lowPass ++ pan)
+    player.sendNew(absoluteTimeToMillis(start), pulse ++ highPass ++ lowPass ++ pan ++ effect)
   }
 
   def subtractiveNoise(note: SubtractiveNote)(implicit player: MusicPlayer): Unit = {
@@ -100,6 +108,7 @@ object Movement3 {
     val dur = note.duration
     val attack = note.attackPoint
     val (panStart, panEnd) = note.pan
+    val effectBus = 20
 
     val noise = whiteNoiseInstrument
       .addAction(TAIL_ACTION)
@@ -128,9 +137,143 @@ object Movement3 {
       .panBus.control(line(dur, panStart, panEnd))
       .buildInstruments()
 
+    val effect = monoVolumeInstrument
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(20)
+      .ampBus.control(line(dur, 1, 1))
+      .buildInstruments()
+
     println(s"Subtractive start $start (${absoluteTimeToMillis(start)}) and duration $dur")
 
-    player.sendNew(absoluteTimeToMillis(start), noise ++ filters ++ pan)
+    player.sendNew(absoluteTimeToMillis(start), noise ++ filters ++ pan ++ effect)
+  }
+
+  def effectSubtractive(implicit player: MusicPlayer): Unit = {
+    val bus = 20
+    val dur = 65
+
+    val volume = monoVolumeInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(21)
+      .ampBus.control(line(dur, 0.2f, 0.1f))
+      .buildInstruments()
+
+    val delay = monoDelayReplaceInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(21)
+      .delayBus.control(ar(dur, 0.3f, (0.3f, 0.55f, 0.2f), nodeId = EFFECT), sine(dur, underSpectrum(48), underSpectrum(48), 0.001f, 0.001f, nodeId = EFFECT))
+      .maxDelay(0.5f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(21)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.6f, 0.9f, nodeId = EFFECT), sine(dur, 0.6f, 0.5f, 0.05f, 0.06f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.07f, 0.09f, nodeId = EFFECT), sine(dur, 0.7f, 0.3f, 0.01f, 0.008f, nodeId = EFFECT))
+      .maxDelay(0.1f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(21)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 1.3f, 1.4f, nodeId = EFFECT), sine(dur, 0.09f, 0.1f, 0.05f, 0.09f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.01f, 0.009f, nodeId = EFFECT))
+      .maxDelay(0.01f)
+      .buildInstruments()
+
+    val pan1 = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(21)
+      .out(0)
+      .panBus.control(line(dur, 0.5f, 1f, EFFECT))
+      .buildInstruments()
+
+    val pan2 = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(21)
+      .out(0)
+      .panBus.control(line(dur, -0.5f, -1f, EFFECT))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(0), volume ++ delay ++ combFilter ++ allpassFilter ++ pan1 ++ pan2)
+  }
+
+  def effectPulse(implicit player: MusicPlayer): Unit = {
+    val bus = 22
+    val dur = 70
+
+    val volume = monoVolumeInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(bus)
+      .out(23)
+      .ampBus.control(line(dur, 0.1f, 0.2f))
+      .buildInstruments()
+
+    val delay = monoDelayReplaceInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .delayBus.control(ar(dur, 0.3f, (0.02f, 0.035f, 0.01f), nodeId = EFFECT), sine(dur, 0.05f, 0.05f, 0.001f, 0.001f, nodeId = EFFECT))
+      .maxDelay(0.04f)
+      .buildInstruments()
+
+    val combFilter = new MonoCombReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.02f, 0.01f, nodeId = EFFECT), sine(dur, 0.06f, 0.05f, 0.05f, 0.06f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.007f, 0.009f, nodeId = EFFECT), sine(dur, 0.007f, 0.003f, 0.01f, 0.008f, nodeId = EFFECT))
+      .maxDelay(0.1f)
+      .buildInstruments()
+
+    val allpassFilter = new MonoAllpassReplaceInstrumentBuilder()
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .in(23)
+      .dur(dur)
+      .decayTimeBus.control(line(dur, 0.03f, 0.02f, nodeId = EFFECT), sine(dur, 0.09f, 0.05f, 0.05f, 0.09f, nodeId = EFFECT))
+      .delayBus.control(line(dur, 0.01f, 0.009f, nodeId = EFFECT))
+      .maxDelay(0.01f)
+      .buildInstruments()
+
+    val pan1 = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .out(0)
+      .panBus.control(line(dur, 1f, 0.5f, EFFECT))
+      .buildInstruments()
+
+    val pan2 = panInstrument
+      .nodeId(EFFECT)
+      .addAction(TAIL_ACTION)
+      .dur(dur)
+      .in(23)
+      .out(0)
+      .panBus.control(line(dur, -1f, -0.5f, EFFECT))
+      .buildInstruments()
+
+    player.sendNew(absoluteTimeToMillis(0), volume ++ delay ++ combFilter ++ allpassFilter ++ pan1 ++ pan2)
   }
 
   def thirdMovement(): Unit = {
@@ -338,6 +481,9 @@ object Movement3 {
         bus = 20)
     )
 
+    effectSubtractive
+
+    effectPulse
 
     val subtractiveNotesStartTimes =
       absolute(underSpectrum(7),
