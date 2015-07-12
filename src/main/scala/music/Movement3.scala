@@ -682,7 +682,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(4),
         duration = underSpectrum(2),
-        amp = 0.8f,
+        amp = 0.6f,
         attackPoint = 0.2f,
         pan = (0.1f, 0.5f),
         pulseFreq = asr(underSpectrum(2), (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
@@ -692,7 +692,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(4),
         duration = underSpectrum(2) + 0.01f,
-        amp = 0.8f,
+        amp = 0.6f,
         attackPoint = 0.2f,
         pan = (-0.9f, -0.1f),
         pulseFreq = asr(underSpectrum(2) + 0.01f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),

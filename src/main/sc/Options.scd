@@ -40,6 +40,7 @@ SynthDescLib.global.browse;
 
 s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-I/mvnt-I_sc.aiff');
 s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-II/mvnt-II_sc.aiff');
+s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-III/mvnt-III_sc.aiff');
 s.prepareForRecord('/Users/danielstahl/Documents/Projects/microsound-ii_mix/mvnt-IV/mvnt-IV_sc.aiff');
 s.record;
 s.stopRecording;
