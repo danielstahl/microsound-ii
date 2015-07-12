@@ -2,6 +2,7 @@ package music
 
 import music.Instruments.LineControlInstrumentBuilder._
 import music.Instruments._
+import music.Movement3.SubtractiveNote
 import music.Piece._
 import net.soundmining.Instrument._
 import net.soundmining.Melody._
@@ -53,15 +54,14 @@ object Movement3 {
     val amp = note.amp
     val attackPoint = note.attackPoint
 
-    //val (pulseFreqStart, pulseFreqEnd) = note.pulseFreq
     val (highPassStart, highPassEnd) = note.highPass
     val (lowPassStart, lowPassEnd) = note.lowPass
+    val (panStart, panEnd) = note.pan
 
     val pulse = pulseInstrument
       .addAction(TAIL_ACTION)
       .dur(dur)
       .out(bus)
-      //.freqBus.control(line(dur, pulseFreqStart, pulseFreqEnd))
       .freqBus.control(note.pulseFreq)
       .ampBus.control(ar(dur, attackPoint, (0f, amp, 0f)))
       .widthBus.control(line(dur, 0.5f, 0.5f))
@@ -87,10 +87,10 @@ object Movement3 {
       .dur(dur)
       .in(bus)
       .out(0)
-      .panBus.control(line(dur, 0.1f, -0.1f))
+      .panBus.control(line(dur, panStart, panEnd))
       .buildInstruments()
 
-    println(s"Pulse start $start ${absoluteTimeToMillis(start)} and duration $dur")
+    println(s"Pulse start $start (${absoluteTimeToMillis(start)}) and duration $dur")
     player.sendNew(absoluteTimeToMillis(start), pulse ++ highPass ++ lowPass ++ pan)
   }
 
@@ -128,6 +128,8 @@ object Movement3 {
       .panBus.control(line(dur, panStart, panEnd))
       .buildInstruments()
 
+    println(s"Subtractive start $start (${absoluteTimeToMillis(start)}) and duration $dur")
+
     player.sendNew(absoluteTimeToMillis(start), noise ++ filters ++ pan)
   }
 
@@ -139,7 +141,7 @@ object Movement3 {
 
     setupNodes(player)
 
-    val subtractiveNotes = Seq(
+    val subtractiveNotes_Org = Seq(
       SubtractiveNote(
         startTime = 0f,
         duration = 1.5f,
@@ -155,37 +157,401 @@ object Movement3 {
         pan = (0.1f, 0.5f),
         filters = subractiveFreqs(Seq((25, 29, 0.8f), (35, 41, 0.6f), (57, 67, 0.5f), (76, 95, 0.4f), (101, 110, 0.2f))),
         attackPoint = 0.7f,
+        bus = 18),
+
+      SubtractiveNote(
+        startTime = 2f,
+        duration = 7.5f,
+        amp = 1f,
+        pan = (-0.99f, -0.1f),
+        filters = subractiveFreqs(Seq((3, 2, 0.7f), (10, 20, 0.1f), (11, 40, 0.3f), (90, 50, 0.5f), (92, 90, 0.4f))),
+        attackPoint = 0.7f,
+        bus = 17),
+      SubtractiveNote(
+        startTime = 2.1f,
+        duration = 7.6f,
+        amp = 1f,
+        pan = (0.99f, 0.1f),
+        filters = subractiveFreqs(Seq((1, 2, 0.7f), (10, 20, 0.1f), (11, 40, 0.3f), (90, 50, 0.5f), (92, 120, 0.4f))),
+        attackPoint = 0.3f,
+        bus = 18),
+
+
+      SubtractiveNote(
+        startTime = 10f,
+        duration = 5.5f,
+        amp = 1f,
+        pan = (-0.99f, -0.9f),
+        filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 17),
+      SubtractiveNote(
+        startTime = 10.1f,
+        duration = 5.6f,
+        amp = 1f,
+        pan = (0.99f, 0.8f),
+        filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 18),
+
+      SubtractiveNote(
+        startTime = 16f,
+        duration = 5.5f,
+        amp = 1f,
+        pan = (-0.99f, -0.9f),
+        filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 17),
+      SubtractiveNote(
+        startTime = 16.1f,
+        duration = 5.6f,
+        amp = 1f,
+        pan = (0.99f, 0.8f),
+        filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 18),
+
+      SubtractiveNote(
+        startTime = 22f,
+        duration = 5.5f,
+        amp = 1f,
+        pan = (-0.99f, -0.0f),
+        filters = subractiveFreqs(Seq((1, 48, 0.7f), (30, 49, 0.1f), (60, 50, 0.3f), (90, 56, 0.5f), (120, 57, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 17),
+      SubtractiveNote(
+        startTime = 22.1f,
+        duration = 5.6f,
+        amp = 1f,
+        pan = (0.99f, 0.0f),
+        filters = subractiveFreqs(Seq((1, 48, 0.7f), (30, 49, 0.1f), (60, 50, 0.3f), (90, 56, 0.5f), (120, 57, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 18),
+
+
+      SubtractiveNote(
+        startTime = 27f,
+        duration = 5.5f,
+        amp = 1f,
+        pan = (-0.01f, -0.99f),
+        filters = subractiveFreqs(Seq((25, 2, 0.8f), (26, 15, 0.9f), (28, 45, 0.5f), (33, 59, 0.2f), (34, 93, 0.8f))),
+        attackPoint = 0.5f,
+        bus = 17),
+      SubtractiveNote(
+        startTime = 27.1f,
+        duration = 5.6f,
+        amp = 1f,
+        pan = (0.01f, 0.99f),
+        filters = subractiveFreqs(Seq((25, 2, 0.3f), (26, 15, 0.9f), (28, 45, 0.5f), (33, 59, 0.2f), (34, 93, 0.7f))),
+        attackPoint = 0.5f,
         bus = 18)
+
     )
 
     //subtractiveNotes.foreach(subtractiveNoise)
 
-    val pulseNotes = Seq(
+    val pulseNotes_Org = Seq(
         PulseNote(
         startTime = 0f,
         duration = 10f,
         amp = 1f,
         attackPoint = 0.1f,
-        pan = (0.1f, -0.1f),
-        //pulseFreq = pulseFreq(0, 30),
+        pan = (-0.1f, -0.9f),
         pulseFreq = line(10, underSpectrum(0), underSpectrum(30)),
         highPass = highPass(95, 4),
         lowPass = lowPass(100, 6),
-        bus = 16
+        bus = 19
       ),
       PulseNote(
-        startTime = 10f,
-        duration = 10f,
+        startTime = 0f,
+        duration = 10.01f,
         amp = 1f,
         attackPoint = 0.1f,
-        pan = (-0.1f, 0.5f),
-        //pulseFreq = pulseFreq(0, 30),
-        pulseFreq = asr(10f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.1f, 0.6f, 0.3f)),
+        pan = (0.1f, 0.9f),
+        pulseFreq = line(10.01f, underSpectrum(0), underSpectrum(30)),
+        highPass = highPass(40, 4),
+        lowPass = lowPass(50, 6),
+        bus = 20
+      ),
+
+      PulseNote(
+        startTime = 12f,
+        duration = 7f,
+        amp = 1f,
+        attackPoint = 0.2f,
+        pan = (0.1f, 0.5f),
+        pulseFreq = asr(7f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
         highPass = highPass(95, 4),
         lowPass = lowPass(100, 6),
+        bus = 19),
+      PulseNote(
+        startTime = 12.01f,
+        duration = 6.99f,
+        amp = 1f,
+        attackPoint = 0.2f,
+        pan = (-0.9f, -0.1f),
+        pulseFreq = asr(6.99f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
+        highPass = highPass(50, 4),
+        lowPass = lowPass(70, 6),
+        bus = 20),
+
+      PulseNote(
+        startTime = 20f,
+        duration = 10f,
+        amp = 1f,
+        attackPoint = 0.3f,
+        pan = (0.7f, 0.2f),
+        pulseFreq = asr(10f, (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
+        highPass = highPass(4, 50),
+        lowPass = lowPass(6, 70),
+        bus = 19),
+      PulseNote(
+        startTime = 20.01f,
+        duration = 9.99f,
+        amp = 1f,
+        attackPoint = 0.3f,
+        pan = (-0.5f, -0.3f),
+        pulseFreq = asr(9.99f, (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
+        highPass = highPass(4, 50),
+        lowPass = lowPass(6, 70),
+        bus = 20),
+
+      PulseNote(
+        startTime = 30f,
+        duration = 3f,
+        amp = 1f,
+        attackPoint = 0.7f,
+        pan = (-0.3f, 0.5f),
+        pulseFreq =  ar(3, 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
+        highPass = highPass(4, 10),
+        lowPass = lowPass(6, 20),
+        bus = 19),
+      PulseNote(
+        startTime = 30.01f,
+        duration = 2.99f,
+        amp = 1f,
+        attackPoint = 0.7f,
+        pan = (-0.1f, 0.7f),
+        pulseFreq =  ar(2.99f, 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
+        highPass = highPass(4, 10),
+        lowPass = lowPass(6, 20),
+        bus = 20)
+    )
+
+
+    val subtractiveNotesStartTimes =
+      absolute(underSpectrum(7),
+      Seq(underSpectrum(2), underSpectrum(20), underSpectrum(12), underSpectrum(1), underSpectrum(9), underSpectrum(2), underSpectrum(1)))
+
+    val subtractiveNotes = Seq(
+      // 2,3
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes.head,
+        duration = underSpectrum(2),
+        amp = 1f,
+        pan = (-0.99f, -0.1f),
+        filters = subractiveFreqs(Seq((3, 2, 0.7f), (10, 20, 0.1f), (11, 40, 0.3f), (90, 50, 0.5f), (92, 90, 0.4f))),
+        attackPoint = 0.7f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes.head + 0.1f,
+        duration = underSpectrum(2) + 0.1f,
+        amp = 1f,
+        pan = (0.99f, 0.1f),
+        filters = subractiveFreqs(Seq((1, 2, 0.7f), (10, 20, 0.1f), (11, 40, 0.3f), (90, 50, 0.5f), (92, 120, 0.4f))),
+        attackPoint = 0.3f,
+        bus = 17),
+
+    // pause
+    // 0,1
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(2),
+        duration = underSpectrum(12),
+        amp = 1f,
+        pan = (-0.5f, -0.7f),
+        filters = subractiveFreqs(Seq((25, 29, 0.2f), (35, 41, 0.4f), (57, 67, 0.5f), (76, 95, 0.6f), (101, 110, 0.8f))),
+        attackPoint = 0.3f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(2) + 0.1f,
+        duration = underSpectrum(12) + 0.1f,
+        amp = 1f,
+        pan = (0.1f, 0.5f),
+        filters = subractiveFreqs(Seq((25, 29, 0.8f), (35, 41, 0.6f), (57, 67, 0.5f), (76, 95, 0.4f), (101, 110, 0.2f))),
+        attackPoint = 0.7f,
+        bus = 17),
+
+      // 4,5
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(3),
+        duration = underSpectrum(2),
+        amp = 1f,
+        pan = (-0.99f, -0.9f),
+        filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(3) + 0.1f,
+        duration = underSpectrum(2) + 0.1f,
+        amp = 1f,
+        pan = (0.99f, 0.8f),
+        filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 17),
+
+    // 6,7
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(4),
+        duration = underSpectrum(9),
+        amp = 1f,
+        pan = (-0.99f, -0.9f),
+        filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(4) + 0.1f,
+        duration = underSpectrum(9) + 0.1f,
+        amp = 1f,
+        pan = (0.99f, 0.8f),
+        filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 17),
+
+    //10,11
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(5),
+        duration = underSpectrum(2),
+        amp = 1f,
+        pan = (-0.01f, -0.99f),
+        filters = subractiveFreqs(Seq((25, 2, 0.8f), (26, 15, 0.9f), (28, 45, 0.5f), (33, 59, 0.2f), (34, 93, 0.8f))),
+        attackPoint = 0.5f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(5) + 0.1f,
+        duration = underSpectrum(2) + 0.6f,
+        amp = 1f,
+        pan = (0.01f, 0.99f),
+        filters = subractiveFreqs(Seq((25, 2, 0.3f), (26, 15, 0.9f), (28, 45, 0.5f), (33, 59, 0.2f), (34, 93, 0.7f))),
+        attackPoint = 0.5f,
+        bus = 17),
+
+    //8,9
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(6),
+        duration = underSpectrum(1),
+        amp = 1f,
+        pan = (-0.99f, -0.0f),
+        filters = subractiveFreqs(Seq((1, 48, 0.7f), (30, 49, 0.1f), (60, 50, 0.3f), (90, 56, 0.5f), (120, 57, 0.9f))),
+        attackPoint = 0.5f,
+        bus = 16),
+      SubtractiveNote(
+        startTime = subtractiveNotesStartTimes(6) + 0.1f,
+        duration = underSpectrum(1) + 0.1f,
+        amp = 1f,
+        pan = (0.99f, 0.0f),
+        filters = subractiveFreqs(Seq((1, 48, 0.7f), (30, 49, 0.1f), (60, 50, 0.3f), (90, 56, 0.5f), (120, 57, 0.9f))),
+        attackPoint = 0.5f,
         bus = 17)
+    )
+
+    subtractiveNotes.foreach(subtractiveNoise)
 
 
+    val pulseNotesstartTimes = absolute(0,
+      Seq(underSpectrum(2), underSpectrum(5), underSpectrum(1), underSpectrum(4), underSpectrum(2))
+    )
+
+
+    val pulseNotes = Seq(
+      // 0
+      PulseNote(
+        startTime = pulseNotesstartTimes.head,
+        duration = underSpectrum(2),
+        amp = 1f,
+        attackPoint = 0.1f,
+        pan = (-0.1f, -0.9f),
+        pulseFreq = line(10, underSpectrum(0), underSpectrum(30)),
+        highPass = highPass(95, 4),
+        lowPass = lowPass(100, 6),
+        bus = 18
+      ),
+      PulseNote(
+        startTime = pulseNotesstartTimes.head,
+        duration = underSpectrum(2) + 0.01f,
+        amp = 1f,
+        attackPoint = 0.1f,
+        pan = (0.1f, 0.9f),
+        pulseFreq = line(10.01f, underSpectrum(0), underSpectrum(30)),
+        highPass = highPass(40, 4),
+        lowPass = lowPass(50, 6),
+        bus = 19
+      ),
+      // pause
+      // 4,5
+      PulseNote(
+        startTime = pulseNotesstartTimes(2),
+        duration = underSpectrum(1),
+        amp = 1f,
+        attackPoint = 0.3f,
+        pan = (0.7f, 0.2f),
+        pulseFreq = asr(underSpectrum(1), (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
+        highPass = highPass(4, 50),
+        lowPass = lowPass(6, 70),
+        bus = 18),
+      PulseNote(
+        startTime = pulseNotesstartTimes(2) + 0.01f,
+        duration = underSpectrum(1) - 0.01f,
+        amp = 1f,
+        attackPoint = 0.3f,
+        pan = (-0.5f, -0.3f),
+        pulseFreq = asr(underSpectrum(1) - 0.01f, (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
+        highPass = highPass(4, 50),
+        lowPass = lowPass(6, 70),
+        bus = 19),
+
+    // 6,7
+      PulseNote(
+        startTime = pulseNotesstartTimes(3),
+        duration = underSpectrum(4),
+        amp = 1f,
+        attackPoint = 0.7f,
+        pan = (-0.3f, 0.5f),
+        pulseFreq =  ar(underSpectrum(4), 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
+        highPass = highPass(4, 10),
+        lowPass = lowPass(6, 20),
+        bus = 18),
+      PulseNote(
+        startTime = pulseNotesstartTimes(3) + 0.01f,
+        duration = underSpectrum(4) - 0.01f,
+        amp = 1f,
+        attackPoint = 0.7f,
+        pan = (-0.1f, 0.7f),
+        pulseFreq =  ar(underSpectrum(4) - 0.01f, 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
+        highPass = highPass(4, 10),
+        lowPass = lowPass(6, 20),
+        bus = 19),
+
+    // 2,3
+      PulseNote(
+        startTime = pulseNotesstartTimes(4),
+        duration = underSpectrum(2),
+        amp = 1f,
+        attackPoint = 0.2f,
+        pan = (0.1f, 0.5f),
+        pulseFreq = asr(underSpectrum(2), (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
+        highPass = highPass(95, 4),
+        lowPass = lowPass(100, 6),
+        bus = 18),
+      PulseNote(
+        startTime = pulseNotesstartTimes(4),
+        duration = underSpectrum(2) + 0.01f,
+        amp = 1f,
+        attackPoint = 0.2f,
+        pan = (-0.9f, -0.1f),
+        pulseFreq = asr(underSpectrum(2) + 0.01f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
+        highPass = highPass(50, 4),
+        lowPass = lowPass(70, 6),
+        bus = 19)
     )
 
     pulseNotes.foreach(pulse)
