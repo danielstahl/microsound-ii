@@ -109,12 +109,13 @@ object Movement3 {
     val attack = note.attackPoint
     val (panStart, panEnd) = note.pan
     val effectBus = 20
+    val amp = note.amp
 
     val noise = whiteNoiseInstrument
       .addAction(TAIL_ACTION)
       .out(bus)
       .dur(dur)
-      .ampBus.control(ar(dur, attack, (0f, 1f, 0f)))
+      .ampBus.control(ar(dur, attack, (0f, amp, 0f)))
       .buildInstruments()
 
     val filters = note.filters.flatMap {
@@ -123,7 +124,7 @@ object Movement3 {
           .addAction(TAIL_ACTION)
           .in(bus)
           .dur(dur)
-          .ampBus.control(ar(dur, attackPoint, (0f, 1f, 0f)))
+          .ampBus.control(ar(dur, attackPoint, (0f, amp, 0f)))
           .bwBus.control(line(dur, 0.00000001f, 0.000000001f))
           .freqBus.control(line(dur, startFreq, endFreq))
           .buildInstruments()
@@ -141,7 +142,7 @@ object Movement3 {
       .addAction(TAIL_ACTION)
       .dur(dur)
       .in(bus)
-      .out(20)
+      .out(effectBus)
       .ampBus.control(line(dur, 1, 1))
       .buildInstruments()
 
@@ -223,7 +224,7 @@ object Movement3 {
       .dur(dur)
       .in(bus)
       .out(23)
-      .ampBus.control(line(dur, 0.1f, 0.2f))
+      .ampBus.control(line(dur, 0.05f, 0.08f))
       .buildInstruments()
 
     val delay = monoDelayReplaceInstrument
@@ -531,7 +532,7 @@ object Movement3 {
       SubtractiveNote(
         startTime = subtractiveNotesStartTimes(3),
         duration = underSpectrum(2),
-        amp = 1f,
+        amp = 1.0f,
         pan = (-0.99f, -0.9f),
         filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
         attackPoint = 0.5f,
@@ -539,7 +540,7 @@ object Movement3 {
       SubtractiveNote(
         startTime = subtractiveNotesStartTimes(3) + 0.1f,
         duration = underSpectrum(2) + 0.1f,
-        amp = 1f,
+        amp = 1.0f,
         pan = (0.99f, 0.8f),
         filters = subractiveFreqs(Seq((5, 4, 0.7f), (6, 7, 0.1f), (11, 10, 0.3f), (12, 15, 0.5f), (17, 16, 0.9f))),
         attackPoint = 0.5f,
@@ -549,7 +550,7 @@ object Movement3 {
       SubtractiveNote(
         startTime = subtractiveNotesStartTimes(4),
         duration = underSpectrum(9),
-        amp = 1f,
+        amp = 1.0f,
         pan = (-0.99f, -0.9f),
         filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
         attackPoint = 0.5f,
@@ -557,7 +558,7 @@ object Movement3 {
       SubtractiveNote(
         startTime = subtractiveNotesStartTimes(4) + 0.1f,
         duration = underSpectrum(9) + 0.1f,
-        amp = 1f,
+        amp = 1.0f,
         pan = (0.99f, 0.8f),
         filters = subractiveFreqs(Seq((100, 95, 0.7f), (102, 103, 0.1f), (105, 110, 0.3f), (106, 120, 0.5f), (122, 121, 0.9f))),
         attackPoint = 0.5f,
@@ -637,7 +638,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(2),
         duration = underSpectrum(1),
-        amp = 1f,
+        amp = 0.5f,
         attackPoint = 0.3f,
         pan = (0.7f, 0.2f),
         pulseFreq = asr(underSpectrum(1), (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
@@ -647,7 +648,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(2) + 0.01f,
         duration = underSpectrum(1) - 0.01f,
-        amp = 1f,
+        amp = 0.5f,
         attackPoint = 0.3f,
         pan = (-0.5f, -0.3f),
         pulseFreq = asr(underSpectrum(1) - 0.01f, (underSpectrum(10), underSpectrum(5), underSpectrum(8), underSpectrum(0)), (0.3f, 0.4f, 0.3f)),
@@ -659,7 +660,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(3),
         duration = underSpectrum(4),
-        amp = 1f,
+        amp = 0.7f,
         attackPoint = 0.7f,
         pan = (-0.3f, 0.5f),
         pulseFreq =  ar(underSpectrum(4), 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
@@ -669,7 +670,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(3) + 0.01f,
         duration = underSpectrum(4) - 0.01f,
-        amp = 1f,
+        amp = 0.7f,
         attackPoint = 0.7f,
         pan = (-0.1f, 0.7f),
         pulseFreq =  ar(underSpectrum(4) - 0.01f, 0.5f, (underSpectrum(5), underSpectrum(2), underSpectrum(6))),
@@ -681,7 +682,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(4),
         duration = underSpectrum(2),
-        amp = 1f,
+        amp = 0.8f,
         attackPoint = 0.2f,
         pan = (0.1f, 0.5f),
         pulseFreq = asr(underSpectrum(2), (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
@@ -691,7 +692,7 @@ object Movement3 {
       PulseNote(
         startTime = pulseNotesstartTimes(4),
         duration = underSpectrum(2) + 0.01f,
-        amp = 1f,
+        amp = 0.8f,
         attackPoint = 0.2f,
         pan = (-0.9f, -0.1f),
         pulseFreq = asr(underSpectrum(2) + 0.01f, (underSpectrum(0), underSpectrum(10), underSpectrum(20), underSpectrum(5)), (0.2f, 0.5f, 0.3f)),
